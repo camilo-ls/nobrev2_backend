@@ -4,8 +4,8 @@ exports.up = function(knex) {
             table.integer('mes').notNull().unsigned()
             table.integer('ano').notNull().unsigned()
             table.integer('ine').unsigned().references('ine').inTable('equipes')
-            table.integer('cbo').unsigned().references('cbo').inTable('cbo')
-            table.bigInteger('procedimento').references('cod').inTable('procedimentos')
+            table.string('cbo').references('cbo').inTable('cbo')
+            table.string('procedimento').references('cod').inTable('procedimentos')
         })
       ) 
   };

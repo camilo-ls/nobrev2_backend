@@ -2,10 +2,10 @@ exports.up = function(knex) {
     return (
         knex.schema.createTable('profissionais', table => {
             table.increments('id').primary()
-            table.bigInteger('cpf').unsigned().notNull()
-            table.bigInteger('cns').unsigned().notNull()
+            table.string('cpf').notNull()
+            table.string('cns').notNull()
             table.string('nome').notNull()
-            table.integer('cbo').unsigned().references('cbo').inTable('cbo')
+            table.string('cbo').references('cbo').inTable('cbo')
             table.integer('cnes').unsigned().references('cnes').inTable('cnes')
             table.integer('ine').unsigned().references('ine').inTable('equipes')
             table.integer('ch_amb').notNull().defaultTo(0)

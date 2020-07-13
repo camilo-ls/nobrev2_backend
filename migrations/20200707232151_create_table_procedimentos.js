@@ -2,7 +2,7 @@
 exports.up = function(knex) {
     return (
         knex.schema.createTable('procedimentos', table => {
-            table.bigInteger('cod').primary()
+            table.string('cod').primary()
             table.string('nome').notNull()
             table.string('descricao')
         })

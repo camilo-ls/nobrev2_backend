@@ -3,7 +3,8 @@ exports.up = function(knex) {
         knex.schema.createTable('equipes', table => {
             table.integer('ine').unsigned().primary()
             table.string('nome').notNull()
-            table.integer('tipo').references('tipo').inTable('equipes_tipo')
+            table.integer('tipo')
+            table.string('tipo_desc')
             table.integer('cnes').unsigned().references('cnes').inTable('cnes')
             table.boolean('loc_cnes').notNull().defaultTo(true)
             table.boolean('ativo').notNull().defaultTo(true)

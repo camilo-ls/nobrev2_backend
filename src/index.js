@@ -8,10 +8,13 @@ server.use(express.json())
 const userRoutes = require('./routes/userRoutes')
 server.use('/user', userRoutes)
 
+const cnesRoutes = require('./routes/cnesRouter')
+server.use('/cnes', cnesRoutes)
+
 server.get('/teste', (req, res) => {
     res.send('API funcionando')
 })
 
-server.listen(3000, () => {
+server.listen(3001, () => {
     console.log('> Servidor online')
 })

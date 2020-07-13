@@ -5,9 +5,10 @@ exports.up = function(knex) {
             table.integer('ano').notNull().unsigned()
             table.integer('ine').unsigned().references('ine').inTable('equipes')
             table.integer('cnes').unsigned().references('cnes').inTable('cnes')
-            table.bigInteger('cns').unsigned().notNull()
+            table.string('cns').notNull()
             table.integer('coeficiente').notNull().defaultTo(1)
             table.integer('param').notNull().defaultTo(1)
+            table.boolean('fechado').notNull().defaultTo(0)
         })
     )
 };
