@@ -7,8 +7,24 @@ class cnesController {
         .from('profissionais').join('cbo', {'profissionais.cbo': 'cbo.cbo'})
         .where({'profissionais.cnes': cnes})
         .orderBy('profissionais.nome')
+        .then(lista => {
+            res.json(lista)
+        })
+        .catch(err => res.status(500).send(err))
+    }
+
+    async getProcUnidade(req, res) {
+        const cnes = req.params.cnes
+        await db.select('procedimento').sum('quantidade as pactuado')
+        .from('profissionais').join('pmp_padrao', 'profissionais.cbo', '=', 'pmp_padrao.cbo')
+        .where({'profissionais.cnes': cnes})
+        .groupBy('procedimento')
         .then(lista => res.json(lista))
         .catch(err => res.status(500).send(err))
+    }
+
+    async getProdUnidade(req, res) {
+        await db.select()
     }
 
     async all(req, res) {
