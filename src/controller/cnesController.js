@@ -15,8 +15,10 @@ class cnesController {
 
     async getProcUnidade(req, res) {
         const cnes = req.params.cnes
-        await db.select('procedimento').sum('quantidade as pactuado')
-        .from('profissionais').join('pmp_padrao', 'profissionais.cbo', '=', 'pmp_padrao.cbo')
+        await db.select('procedimento', 'procedimentos.nome').sum('quantidade as pactuado')
+        .from('profissionais')
+        .join('pmp_padrao', 'profissionais.cbo', '=', 'pmp_padrao.cbo')
+        .join('procedimentos', 'procedimento', '=', 'procedimentos.cod')
         .where({'profissionais.cnes': cnes})
         .groupBy('procedimento')
         .then(lista => res.json(lista))

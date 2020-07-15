@@ -11,6 +11,9 @@ server.use('/user', userRoutes)
 const cnesRoutes = require('./routes/cnesRouter')
 server.use('/cnes', cnesRoutes)
 
+const profRoutes = require('./routes/profRouter')
+server.use('/prof', profRoutes)
+
 server.get('/teste', (req, res) => {
     res.send('API funcionando')
 })
