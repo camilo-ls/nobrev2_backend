@@ -1,4 +1,4 @@
-const TaskValidator = async (req, res, next) => {
+const userValidator = async (req, res, next) => {
     const { nivel, email, nome, password, admin, ativo } = req.body
 
     if (!nivel) {
@@ -27,4 +27,4 @@ const TaskValidator = async (req, res, next) => {
   
 }
 
-module.exports = TaskValidator
+module.exports = userValidator
