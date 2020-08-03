@@ -1,4 +1,5 @@
 const db = require('../config/database')
+const bcrypt = require('bcryptjs')
 
 class userController {
     async create(req, res) {
@@ -8,6 +9,9 @@ class userController {
         if (checkEmail) {
             return res.status(400).send('E-mail já cadastrado')
         }
+
+        const hashedPassword = await bcrypt.hash(user.password, 10)
+        user.password = hashedPassword
         
         await db('users').insert(user)
         .then(conf => res.status(200).send('Sucesso'))

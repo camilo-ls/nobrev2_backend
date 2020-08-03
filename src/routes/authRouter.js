@@ -1,7 +1,12 @@
 const express = require('express')
 const router = express.Router()
-const auth = require('../config/auth')
 
-router.post('/signin', auth.signin)
+router.post('/login', (req, res) => {
+    console.log(req.body)
+})
 
-export default router
+router.post('/register', (req, res) => {
+    console.log(req.body)
+})
+
+module.exports = router

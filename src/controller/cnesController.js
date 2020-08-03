@@ -67,7 +67,8 @@ class cnesController {
         const cnes = req.params.cnes
         await db('cnes')
         .select('cnes', 'nome', 'bairro', 'tipologia', 'tipo')
-        .where({ 'cnes': cnes }).first()
+        .where({ 'cnes': cnes })
+        .first()
         .then(resultado => {
             if (resultado) {
                 res.json(resultado)

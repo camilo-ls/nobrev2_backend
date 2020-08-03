@@ -11,6 +11,16 @@ class profController {
         .then(proc => res.json(proc))
         .catch(err => res.status(500).send(err))
     }
+
+    async get(req, res) {
+        const cpf = req.params.cpf
+        await db.select('id', 'cpf', 'cns', 'nome', 'cbo', 'cnes')
+        .from('profissionais')
+        .where({'cpf': cpf})
+        .first()
+        .then(retorno => res.json(retorno))
+        .catch(err => res.status(500).send(err))
+    }
 }
 
 module.exports = new profController()
