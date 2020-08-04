@@ -1,5 +1,5 @@
 const userValidator = async (req, res, next) => {
-    const { nivel, email, nome, password, admin, ativo } = req.body
+    const { nivel, nome, email, password, admin, ativo, cnes, cpf } = req.body
 
     if (!nivel) {
         req.body.nivel = 0

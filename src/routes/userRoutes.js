@@ -4,11 +4,8 @@ const router = express.Router()
 const userController = require('../controller/userController')
 const userValidator = require('../middlewares/userValidator')
 
-router.post('/', userValidator, userController.create)
 router.put('/:id', userValidator, userController.update)
 router.get('/', userController.all)
 router.get('/:id', userController.get)
-
-
 
 module.exports = router

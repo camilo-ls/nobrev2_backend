@@ -1,5 +1,7 @@
 const db = require('../config/database')
 const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
+const authSecret = require('../../.env')
 
 class userController {
     async create(req, res) {
@@ -14,7 +16,22 @@ class userController {
         user.password = hashedPassword
         
         await db('users').insert(user)
-        .then(conf => res.status(200).send('Sucesso'))
+        .then(userId => {
+            const payload = {
+                id: userId,
+                nome: user.nome,
+                nivel: user.nivel,
+                admin: user.admin,
+                cnes: user.cnes
+            }
+            jwt.sign(payload, authSecret, { expiresIn: '1h' }, (err, token) => {
+                if (err) {
+                    res.status(400).send(err)
+                }
+                res.status(200).json({token: token}).send('Usuário cadastrado com sucesso')                
+            })            
+            
+        })
         .catch(err => res.status(500).send(err))
     }
     
@@ -41,6 +58,39 @@ class userController {
         .then(resultado => {
             if (resultado) {
                 res.json(resultado)
+            }
+            else {
+                res.status(500).send('Usuário não existe')
+            }
+        })
+        .catch(err => res.status(500).send(err))
+    }
+
+    async login(req, res) {
+        const email = req.body.email
+        const password = req.body.password
+        await db('users').select('id', 'nome', 'email', 'password', 'admin', 'nivel', 'ativo')
+        .where({'email': email}).first()
+        .then(resultado => {
+            if (resultado) {
+                if (bcrypt.compareSync(password, resultado.password)) {
+                    const payload = {
+                        id: resultado.id,
+                        nome: resultado.nome,
+                        nivel: resultado,nivel,
+                        admin: resultado.admin,
+                        cnes: resultado.cnes
+                    }
+                    jwt.sign(payload, authSecret, { expiresIn: '1h' }, (err, token) => {
+                        if (err) {
+                            res.status(400).send(err)
+                        }
+                        res.status(200).json({token: token}).send('Usuário autenticado com sucesso')                   
+                    })                    
+                }
+                else {
+                    res.status(500).send('Senha não confere')
+                }
             }
             else {
                 res.status(500).send('Usuário não existe')

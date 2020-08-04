@@ -1,12 +1,11 @@
 const express = require('express')
 const router = express.Router()
 
-router.post('/login', (req, res) => {
-    console.log(req.body)
-})
+const userController = require('../controller/userController')
+const api = require('../config/database')
 
-router.post('/register', (req, res) => {
-    console.log(req.body)
-})
+router.post('/register', userController.create)
+
+router.post('/login', userController.login)
 
 module.exports = router
