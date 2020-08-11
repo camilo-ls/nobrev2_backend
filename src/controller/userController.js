@@ -1,7 +1,7 @@
 const db = require('../config/database')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const authSecret = require('../../.env')
+const {authSecret} = require('../../.env')
 
 class userController {
     async create(req, res) {
@@ -9,7 +9,12 @@ class userController {
                    
         const checkEmail = await db('users').select('email').where({'email': user.email}).first()
         if (checkEmail) {
-            return res.status(400).send('E-mail já cadastrado')
+            return res.status(400).send({message: 'E-mail já cadastrado'})
+        }
+
+        const checkCpf = await db('users').select('cpf').where({'cpf': user.cpf}).first()
+        if (checkCpf) {
+            return res.status(400).send({message: 'CPF já cadastrado'})
         }
 
         const hashedPassword = await bcrypt.hash(user.password, 10)
@@ -24,15 +29,15 @@ class userController {
                 admin: user.admin,
                 cnes: user.cnes
             }
-            jwt.sign(payload, authSecret, { expiresIn: '1h' }, (err, token) => {
-                if (err) {
-                    res.status(400).send(err)
+            let token = jwt.sign(payload, authSecret, { expiresIn: '1h' })  
+            res.json(
+                { 
+                    token: token,
+                    msg: 'Usuário cadastrado com sucesso!'
                 }
-                res.status(200).json({token: token}).send('Usuário cadastrado com sucesso')                
-            })            
-            
+            )            
         })
-        .catch(err => res.status(500).send(err))
+        .catch(err => res.status(500).send(err.message))
     }
     
     async update(req, res) {
@@ -41,14 +46,14 @@ class userController {
         await db('users').update(user)
         .where({'id': id})
         .then(result => res.status(200).send('Sucesso'))
-        .catch(err => res.status(400).send(err))
+        .catch(err => res.status(400).send(err.message))
     }
 
     async all(req, res) {
         await db('users').select('id', 'nome', 'email', 'admin', 'nivel', 'ativo')
         .orderBy('nome', 'desc')
         .then(lista => res.json(lista))
-        .catch(err => res.status(500).send(err))
+        .catch(err => res.status(500).send(err.message))
     }
 
     async get(req, res) {
@@ -60,16 +65,16 @@ class userController {
                 res.json(resultado)
             }
             else {
-                res.status(500).send('Usuário não existe')
+                res.status(500).send({message: 'Usuário não existe'})
             }
         })
-        .catch(err => res.status(500).send(err))
+        .catch(err => res.status(500).send(err.message))
     }
 
-    async login(req, res) {
+    async login(req, res) {        
         const email = req.body.email
         const password = req.body.password
-        await db('users').select('id', 'nome', 'email', 'password', 'admin', 'nivel', 'ativo')
+        await db('users').select('id', 'nome', 'email', 'password', 'admin', 'nivel', 'ativo', 'cnes')
         .where({'email': email}).first()
         .then(resultado => {
             if (resultado) {
@@ -77,26 +82,23 @@ class userController {
                     const payload = {
                         id: resultado.id,
                         nome: resultado.nome,
-                        nivel: resultado,nivel,
+                        nivel: resultado.nivel,
                         admin: resultado.admin,
                         cnes: resultado.cnes
-                    }
+                    }                    
                     jwt.sign(payload, authSecret, { expiresIn: '1h' }, (err, token) => {
-                        if (err) {
-                            res.status(400).send(err)
-                        }
-                        res.status(200).json({token: token}).send('Usuário autenticado com sucesso')                   
+                        res.json({token: token})                  
                     })                    
                 }
                 else {
-                    res.status(500).send('Senha não confere')
+                    res.status(500).send({message: 'Senha não confere'})
                 }
             }
             else {
-                res.status(500).send('Usuário não existe')
+                res.status(500).send({message: 'Usuário não existe'})
             }
         })
-        .catch(err => res.status(500).send(err))
+        .catch(err => res.status(500).send(err.message))
     }
 }
 
