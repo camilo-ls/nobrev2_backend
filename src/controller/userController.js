@@ -100,6 +100,18 @@ class userController {
         })
         .catch(err => res.status(500).send(err.message))
     }
+
+    async verifyToken(req, res) {
+        const token = req.body.token
+        jwt.verify(token, authSecret, (err, decoded) => {
+            if (err) {
+                res.status(401).send(false)
+            }
+            else {
+                res.status(200).send(true)
+            }
+        })
+    }
 }
 
 module.exports = new userController()
