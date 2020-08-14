@@ -10,6 +10,9 @@ server.use(cors())
 server.use(bodyParser.json())
 server.use(bodyParser.urlencoded({ extended: false }))
 
+const pactRoutes = require('./routes/pactRouter')
+server.use('/pact', pactRoutes)
+
 const authRoutes = require('./routes/authRouter')
 server.use('/auth', authRoutes)
 

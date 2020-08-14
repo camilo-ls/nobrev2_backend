@@ -19,9 +19,12 @@ class userController {
 
         const hashedPassword = await bcrypt.hash(user.password, 10)
         user.password = hashedPassword
+
+        const user_cbo = await db('profissionais').select('cbo').where({'cpf': user.cpf}).first()
+        if (user_cbo.cbo == 131210) user.nivel = 1
         
         await db('users').insert(user)
-        .then(userId => {
+        .then(userId => {                       
             const payload = {
                 id: userId,
                 nome: user.nome,
@@ -29,6 +32,7 @@ class userController {
                 admin: user.admin,
                 cnes: user.cnes
             }
+            
             let token = jwt.sign(payload, authSecret, { expiresIn: '1h' })  
             res.json(
                 { 
