@@ -35,26 +35,7 @@ class cnesController {
            res.json(resultado)
         })
         .catch(err => res.status(500).send(err))
-    }
-
-    async setPactFuncionario(req, res) {
-        const user = req.body
-        const { mes, ano, ine, cnes, cns, dias_pactuados, fechado, justificativa } = user
-        const coeficiente = dias_pactuados/20
-        await db('pmp_hist').insert({
-            'mes': mes,
-            'ano': ano,
-            'ine': ine,
-            'cnes': cnes,
-            'cns': cns,
-            'coeficiente': coeficiente,
-            'dias_pactuados': dias_pactuados,
-            'fechado': fechado,
-            'justificativa': justificativa 
-        })
-        .then(resp => res.status(200).send(resp))
-        .catch(err => res.status(500).send(err))
-    }
+    } 
 
     async all(req, res) {
         await db('cnes')

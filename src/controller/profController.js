@@ -9,11 +9,12 @@ class profController {
         if (req.params.mes) mes = req.params.mes
         if (req.params.ano) ano = req.params.ano
 
+        console.log(cns, ano, mes)
+
         const dias_uteis = await db('dias_uteis').select('dias_uteis').where({'ano': ano, 'mes': mes}).first()
         let pact_user = await db('pmp_hist').select('coeficiente').where({'cns': cns, 'mes': mes, 'ano': ano}).first()       
         if (pact_user) pact_user = pact_user.coeficiente
-        else pact_user = dias_uteis.dias_uteis/20
-        console.log(ano, mes, dias_uteis, pact_user)
+        else pact_user = dias_uteis.dias_uteis/20        
             
         await db.select('profissionais.nome as profissional', 'procedimentos.nome', 'pmp_padrao.procedimento as cod', 'pmp_padrao.quantidade')
         .from('pmp_padrao')
@@ -22,9 +23,9 @@ class profController {
         .where({'profissionais.cns': cns})
         .then(proc => {
             proc.map(procedimento => {                
-                procedimento.quantidade = Math.ceil(procedimento.quantidade * pact_user)
-            })
-            proc.res.json(proc)
+                procedimento.quantidade = Math.ceil(procedimento.quantidade * pact_user)                
+            })            
+           res.status(200).json(proc)
         })
         .catch(err => res.status(500).send(err))
     }
