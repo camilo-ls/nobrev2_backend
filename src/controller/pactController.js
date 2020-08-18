@@ -25,7 +25,10 @@ class pactController {
             .then(resp => {
                 prof.cargo = resp.nome
             })
-            .catch(e => console.log(e))
+            .catch(e => {
+                console.log(e)
+                prof.cargo = 'INDEFINIDO' 
+            })
             await db('dias_uteis').select('dias_uteis').where({'ano': ano, 'mes': mes}).first()
                     .then(resp => {
                         prof.dias_pactuados = resp.dias_uteis
@@ -113,7 +116,7 @@ class pactController {
                 'fechado': true,
                 'justificativa': justificativa 
             })
-            .then(resp => res.status(200).json(resp))
+            .then(resp => res.status(200).json({resp, message: 'Pactuação realizada com sucesso'}))
             .catch(err => res.status(500).json(err))
         }
         else {
@@ -126,8 +129,8 @@ class pactController {
                 'dias_pactuados': dias_pactuados,
                 'fechado': true,
                 'justificativa': justificativa 
-            })
-            .then(resp => res.status(200).json(resp))
+            }).where({'cns': cns, 'ano': ano, 'mes': mes})
+            .then(resp => res.status(200).json({resp, message: 'Pactuação atualizada com sucesso'}))
             .catch(err => res.status(500).json(err))
         }
     }
