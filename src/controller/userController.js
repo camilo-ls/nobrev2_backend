@@ -24,19 +24,9 @@ class userController {
         if (user_cbo.cbo == 131210) user.nivel = 1
         
         await db('users').insert(user)
-        .then(userId => {                       
-            const payload = {
-                id: userId,
-                nome: user.nome,
-                nivel: user.nivel,
-                admin: user.admin,
-                cnes: user.cnes
-            }
-            
-            let token = jwt.sign(payload, authSecret, { expiresIn: '1h' })  
+        .then(userId => { 
             res.json(
                 { 
-                    token: token,
                     msg: 'Usuário cadastrado com sucesso!'
                 }
             )            
@@ -78,21 +68,27 @@ class userController {
     async login(req, res) {        
         const email = req.body.email
         const password = req.body.password
-        await db('users').select('id', 'nome', 'email', 'password', 'admin', 'nivel', 'ativo', 'cnes')
+        await db('users').select('id', 'nome', 'email', 'password', 'admin', 'nivel', 'ativo', 'cnes', 'cpf')
         .where({'email': email}).first()
-        .then(resultado => {
+        .then(async resultado => {
             if (resultado) {
                 if (bcrypt.compareSync(password, resultado.password)) {
-                    const payload = {
-                        id: resultado.id,
-                        nome: resultado.nome,
-                        nivel: resultado.nivel,
-                        admin: resultado.admin,
-                        cnes: resultado.cnes
-                    }                    
-                    jwt.sign(payload, authSecret, { expiresIn: '1h' }, (err, token) => {
-                        res.json({token: token})                  
-                    })                    
+                    await db('profissionais').select('cns')
+                    .where({'cpf': resultado.cpf}).first()
+                    .then(cns => {
+                        const payload = {
+                            id: resultado.id,
+                            nome: resultado.nome,
+                            nivel: resultado.nivel,
+                            admin: resultado.admin,
+                            cnes: resultado.cnes,
+                            cns: cns.cns
+                        }                    
+                        jwt.sign(payload, authSecret, { expiresIn: '1h' }, (err, token) => {
+                            res.json({token: token})                  
+                        })                    
+                    })
+                    .catch(err => res.status(500).send(err.message))                    
                 }
                 else {
                     res.status(500).send({message: 'Senha não confere'})
