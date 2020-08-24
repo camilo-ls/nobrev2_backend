@@ -3,9 +3,10 @@
 module.exports = {
   client: 'mysql',
   connection: {
+    host: 'dcid.semsa',    
     database: 'nobre',
-    user:     'root',
-    password: 'root'
+    user:     'nobre',
+    password: 'gretinha'
   },
   pool: {
     min: 2,
