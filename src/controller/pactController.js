@@ -21,6 +21,15 @@ class pactController {
         }
 
         for (let prof of listaProfissionais) {
+            const idx = await listaProfissionais.findIndex(prof => !arrayCnes.includes(prof.cbo))           
+            if (idx != -1) {
+                console.log(listaProfissionais[idx])
+                listaProfissionais.splice(idx, 1)
+                continue
+            }
+        }
+
+        for (let prof of listaProfissionais) {
             await db('cbo').select('nome').where({'cbo': prof.cbo}).first()
             .then(resp => {
                 prof.cargo = resp.nome
@@ -29,6 +38,7 @@ class pactController {
                 console.log(e)
                 prof.cargo = 'INDEFINIDO' 
             })
+            
             await db('dias_uteis').select('dias_uteis').where({'ano': ano, 'mes': mes}).first()
                     .then(resp => {
                         prof.dias_pactuados = resp.dias_uteis

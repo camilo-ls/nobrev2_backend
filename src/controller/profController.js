@@ -2,14 +2,13 @@ const db = require('../config/database')
 
 class profController {
     async getMeta(req, res) {
+        const cnes = req.params.cnes
         const cns = req.params.cns
         let mes = new Date().getMonth()
         let ano = new Date().getFullYear()
 
         if (req.params.mes) mes = req.params.mes
         if (req.params.ano) ano = req.params.ano
-
-        console.log(cns, ano, mes)
 
         const dias_uteis = await db('dias_uteis').select('dias_uteis').where({'ano': ano, 'mes': mes}).first()
         let pact_user = await db('pmp_hist').select('coeficiente').where({'cns': cns, 'mes': mes, 'ano': ano}).first()       
@@ -20,7 +19,7 @@ class profController {
         .from('pmp_padrao')
         .join('profissionais', 'profissionais.cbo', '=', 'pmp_padrao.cbo')
         .join('procedimentos', 'pmp_padrao.procedimento', '=', 'procedimentos.cod')
-        .where({'profissionais.cns': cns})
+        .where({'profissionais.cns': cns, 'pmp_padrao.cnes': cnes})
         .then(proc => {
             proc.map(procedimento => {                
                 procedimento.quantidade = Math.ceil(procedimento.quantidade * pact_user)                
