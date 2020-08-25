@@ -12,6 +12,7 @@ router.get('/unidade/:cnes/:ano/:mes', pactController.getListaPact)
 router.get('/unidade_pact/:cnes/:ano/:mes', pactController.getPactUnidade)
 router.get('/disa_pact/:disa/:ano/:mes', pactController.getPactDisa)
 router.get('/faltam_pactuar/:disa/:ano/:mes', pactController.listaUnidadesPact)
+router.get('/responsabilidade/:cnes', pactController.getResponsabilidade)
 
 router.post('/pactuar', pactController.setPactFuncionario)
 

@@ -266,7 +266,14 @@ class pactController {
             .then(resp => res.status(200).json({resp, message: 'Pactuação atualizada com sucesso'}))
             .catch(err => res.status(500).json(err))
         }
-    }   
+    }
+    async getResponsabilidade(req, res) {
+        const cnes = req.params.cnes
+
+        await db('responsabilidade').select().where({'pai': cnes})
+        .then(resp => res.status(200).json(resp))
+        .catch(e => res.status(500).json(e))
+    } 
 }
 
 module.exports = new pactController()
