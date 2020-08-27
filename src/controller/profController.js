@@ -30,10 +30,10 @@ class profController {
     }
 
     async get(req, res) {
-        const cpf = req.params.cpf
+        const cns = req.params.cns
         await db.select('id', 'cpf', 'cns', 'nome', 'cbo', 'cnes')
         .from('profissionais')
-        .where({'cpf': cpf})
+        .where({'cns': cns})
         .first()
         .then(retorno => res.json(retorno))
         .catch(err => res.status(500).send(err))
