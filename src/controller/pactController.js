@@ -213,9 +213,17 @@ class pactController {
         const data = {
             ano: new Date().getFullYear(),
             mes: new Date().getMonth() + 1,
-            dia: new Date().getDay().toString()
+            dia: new Date().getDate()
         }
         res.status(200).json(data)
+    }
+
+    async getDataRevisao(req, res) {
+        const ano = req.params.ano
+        const mes = req.params.mes
+        await db('pact_numoa').select('dia').where({'ano': ano, 'mes': mes}).first()
+        .then(resp => res.status(200).send(resp))
+        .catch(err => res.status(500).send({message: err}))
     }
 
     async getDiasPact(req, res) {
