@@ -55,7 +55,7 @@ class cnesController {
                 res.json(resultado)
             }
             else {
-                res.status(500).send('Nenhum registro encontrado')
+                res.status(500).send({message: 'CNES não encontrado.'})
             }
         })
     }
