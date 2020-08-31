@@ -26,10 +26,14 @@ class cnesController {
     }
 
     async getPactFuncionario(req, res) {
+        const cns = req.params.cns
+        const mat = req.params.mat
+        const ano = req.params.ano
+        const mes = req.params.mes
         await db.select('dias_pactuados', 'fechado', 'justificativa')
-        .from('pmp_hist').where({'cns': req.params.cns})
-        .andWhere({'ano': req.params.ano})
-        .andWhere({'mes': req.params.mes})
+        .from('pmp_hist').where({'mat': mat, 'cns': cns})
+        .andWhere({'ano': ano})
+        .andWhere({'mes': mes})
         .first()
         .then(resultado => {
            res.json(resultado)
@@ -48,7 +52,7 @@ class cnesController {
         const cnes = req.params.cnes
         await db('cnes')
         .select('cnes', 'nome', 'bairro', 'tipologia', 'tipo')
-        .where({ 'cnes': cnes })
+        .where({'cnes': cnes})
         .first()
         .then(resultado => {
             if (resultado) {

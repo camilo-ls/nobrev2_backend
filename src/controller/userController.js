@@ -73,7 +73,7 @@ class userController {
         .then(async resultado => {
             if (resultado) {
                 if (bcrypt.compareSync(password, resultado.password)) {
-                    await db('profissionais').select('cns')
+                    await db('profissionais').select('cns', 'mat')
                     .where({'cpf': resultado.cpf}).first()
                     .then(cns => {
                         const payload = {
@@ -82,13 +82,14 @@ class userController {
                             nivel: resultado.nivel,
                             admin: resultado.admin,
                             cnes: resultado.cnes,
-                            cns: cns.cns
+                            cns: cns.cns,
+                            mat: cns.mat
                         }                    
                         jwt.sign(payload, authSecret, { expiresIn: '1h' }, (err, token) => {
                             res.json({token: token})                  
                         })                    
                     })
-                    .catch(err => res.status(500).send(err.message))                    
+                    .catch(err => res.status(500).send({message: err.message}))                    
                 }
                 else {
                     res.status(500).send({message: 'Senha não confere'})
@@ -98,7 +99,7 @@ class userController {
                 res.status(500).send({message: 'Usuário não existe'})
             }
         })
-        .catch(err => res.status(500).send(err.message))
+        .catch(err => res.status(500).send({message: err.message}))
     }
 
     async verifyToken(req, res) {

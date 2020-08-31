@@ -7,7 +7,7 @@ class pactController {
         const ano = req.params.ano
         const mes = req.params.mes       
 
-        let listaProfissionais = await db('profissionais').select('nome', 'cns', 'cbo')
+        let listaProfissionais = await db('profissionais').select('nome', 'cns', 'mat', 'cbo')
         .where({'cnes': cnes}).orderBy('cbo', 'nome')
         
         const listaCnes = await db('pmp_padrao').select('cbo').where({'cnes': cnes})
@@ -45,7 +45,7 @@ class pactController {
                         prof.fechado = false
                     })
                     .catch(e => console.log(e))
-            await db('pmp_hist').select().where({'cnes': cnes, 'cns': prof.cns, 'ano': ano, 'mes': mes}).first()
+            await db('pmp_hist').select().where({'cnes': cnes, 'cns': prof.cns, 'mat': prof.mat, 'ano': ano, 'mes': mes}).first()
             .then(resp => {
                 if (resp) {
                     prof.dias_pactuados = resp.dias_pactuados
@@ -59,12 +59,13 @@ class pactController {
                 'ano': ano,
                 'cnes': cnes,
                 'cns': prof.cns,
+                'mat': prof.mat,
                 'coeficiente': prof.dias_pactuados/20,
                 'dias_pactuados': prof.dias_pactuados,
                 'fechado': prof.fechado,
                 'justificativa': prof.justificativa 
             }
-            const ja_existe = await db('pmp_hist').select().where({'mes': prof_aux.mes, 'ano': prof_aux.ano, 'cns': prof_aux.cns}).first()
+            const ja_existe = await db('pmp_hist').select().where({'mes': prof_aux.mes, 'ano': prof_aux.ano, 'cns': prof_aux.cns, 'mat': prof_aux.mat}).first()
             if (!ja_existe) await db('pmp_hist').insert(prof_aux)           
         }
         if (!listaProfissionais) res.status(400).send({message: 'Não existem profissionais na unidade selecionada'})        
@@ -77,7 +78,7 @@ class pactController {
         const ano = req.params.ano
         const mes = req.params.mes
 
-        let listaProfissionais = await db('profissionais').select('cns', 'cbo', 'coef_ESAP').where({'cnes': cnes})
+        let listaProfissionais = await db('profissionais').select('cns', 'mat', 'cbo', 'coef_ESAP').where({'cnes': cnes})
         let diasUteis = await db('dias_uteis').select('dias_uteis').where({'ano': ano, 'mes': mes}).first()     
         let listaProcedimentos = await db('pmp_padrao').select('nome', 'procedimento as cod').sum('quantidade as quantidade').where({'cnes': cnes})
         .leftJoin('procedimentos', 'procedimentos.cod', 'pmp_padrao.procedimento').groupBy('procedimento').orderBy('procedimento')
@@ -85,7 +86,7 @@ class pactController {
         for (let proc of listaProcedimentos) proc.quantidade = 0   
         
         for (let prof of listaProfissionais) {
-            let coefPact = await db('pmp_hist').select('coeficiente').where({'cns': prof.cns, 'ano': ano, 'mes': mes}).first()
+            let coefPact = await db('pmp_hist').select('coeficiente').where({'cns': prof.cns, 'mat': prof.mat, 'ano': ano, 'mes': mes}).first()
             
             let procedimentos = await db('pmp_padrao').select('procedimento as cod', 'quantidade').where({'cnes': cnes, 'cbo': prof.cbo})
 
@@ -143,7 +144,7 @@ class pactController {
         let listaProcedimentosDisa = []
         let listaUnidades = await db('cnes').select('cnes').where({'disa': disa})
         for (let unidade of listaUnidades) {            
-            let listaProfissionais = await db('profissionais').select('cns', 'cbo', 'coef_ESAP').where({'cnes': unidade.cnes})
+            let listaProfissionais = await db('profissionais').select('cns', 'mat', 'cbo', 'coef_ESAP').where({'cnes': unidade.cnes})
             let diasUteis = await db('dias_uteis').select('dias_uteis').where({'ano': ano, 'mes': mes}).first()     
             //let listaProcedimentos = await db('pmp_padrao').select('nome', 'procedimento as cod').sum('quantidade as quantidade').where({'cnes': unidade.cnes})
             //.leftJoin('procedimentos', 'procedimentos.cod', 'pmp_padrao.procedimento').groupBy('procedimento').orderBy('procedimento')
@@ -151,7 +152,7 @@ class pactController {
             //for (let proc of listaProcedimentos) proc.quantidade = 0   
             
             for (let prof of listaProfissionais) {
-                let coefPact = await db('pmp_hist').select('coeficiente').where({'cns': prof.cns, 'ano': ano, 'mes': mes}).first()                
+                let coefPact = await db('pmp_hist').select('coeficiente').where({'cns': prof.cns, 'mat': prof.mat, 'ano': ano, 'mes': mes}).first()                
                 let procedimentos = await db('pmp_padrao').select('procedimento as cod', 'quantidade', 'nome').where({'cnes': unidade.cnes, 'cbo': prof.cbo})
                 .leftJoin('procedimentos', 'pmp_padrao.procedimento', 'procedimentos.cod').orderBy('cod')
 
@@ -185,10 +186,11 @@ class pactController {
 
     async getCoef(req, res) {
         const cns = req.params.cns
+        const mat = req.params.mat
         const ano = req.params.ano
         const mes = req.params.mes
 
-        const pact_user = await db('pmp_hist').select('coeficiente').where({'cns': cns, 'mes': mes, 'ano': ano}).first()
+        const pact_user = await db('pmp_hist').select('coeficiente').where({'cns': cns, 'mat': mat, 'mes': mes, 'ano': ano}).first()
         if (!pact_user) res.status(400).send({message: 'Profissional não teve pactuação na competência informada.'})
         else res.status(200).json({'coeficiente': pact_user.coeficiente})
     }
@@ -228,10 +230,11 @@ class pactController {
 
     async getDiasPact(req, res) {
         const cns = req.params.cns
+        const mat = req.params.mat
         const ano = req.params.ano
         const mes = req.params.mes
 
-        let dias_uteis = await db('pmp_hist').select('dias_pactuados').where({'cns': cns, 'mes': mes, 'ano': ano}).first()        
+        let dias_uteis = await db('pmp_hist').select('dias_pactuados').where({'cns': cns, 'mat': mat, 'mes': mes, 'ano': ano}).first()        
         if (!dias_uteis) {
             dias_uteis = await db('dias_uteis').select('dias_uteis').where({'mes': mes, 'ano': ano}).first()
             dias_uteis = dias_uteis.dias_uteis
@@ -242,16 +245,17 @@ class pactController {
 
     async setPactFuncionario(req, res) {
         const user = req.body
-        const { mes, ano, cnes, cns, dias_pactuados, justificativa } = user
+        const { mes, ano, cnes, cns, mat, dias_pactuados, justificativa } = user
         const coeficiente = dias_pactuados/20
 
-        const pactuado = await db('pmp_hist').select().where({'cns': cns, 'ano': ano, 'mes': mes}).first()
+        const pactuado = await db('pmp_hist').select().where({'cns': cns, 'mat': mat, 'ano': ano, 'mes': mes}).first()
         if (!pactuado) {
             await db('pmp_hist').insert({
                 'mes': mes,
                 'ano': ano,
                 'cnes': cnes,
                 'cns': cns,
+                'mat': mat,
                 'coeficiente': coeficiente,
                 'dias_pactuados': dias_pactuados,
                 'fechado': true,
@@ -266,6 +270,7 @@ class pactController {
                 'ano': ano,
                 'cnes': cnes,
                 'cns': cns,
+                'mat': mat,
                 'coeficiente': coeficiente,
                 'dias_pactuados': dias_pactuados,
                 'fechado': true,
@@ -277,11 +282,20 @@ class pactController {
     }
     async getResponsabilidade(req, res) {
         const cnes = req.params.cnes
-
-        await db('responsabilidade').select().where({'pai': cnes})
+        await db.select('responsabilidade.filho as cnes', 'cnes.nome')
+        .from('responsabilidade')
+        .leftJoin('cnes', 'responsabilidade.filho', 'cnes.cnes')
+        .where({'responsabilidade.pai': cnes})
         .then(resp => res.status(200).json(resp))
         .catch(e => res.status(500).json(e))
-    } 
+    }
+
+    async setCnesAtivo(req, res) {
+        const cnes = req.body.cnes
+        const cpf = req.body.cpf
+        await db('users').update('cnes_ativo')
+        .where({})
+    }
 }
 
 module.exports = new pactController()
