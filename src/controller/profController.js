@@ -41,6 +41,14 @@ class profController {
         .catch(err => res.status(500).send({message: 'CNS não encontrado.', err}))
     }
 
+    async getCns(req, res) {
+        const cns = req.params.cns
+        await db('profissionais').select('id', 'cpf', 'cns', 'mat', 'nome', 'cbo', 'cnes')
+        .where({'cns': cns})
+        .then(retorno => res.json(retorno))
+        .catch(err => res.status(500).send({message: 'CPF não encontrado.', err}))
+    }
+
     async getCpf(req, res) {
         const cpf = req.params.cpf
         await db('profissionais').select('id', 'cpf', 'cns', 'mat', 'nome', 'cbo', 'cnes')
