@@ -73,42 +73,20 @@ class pactController {
     }
 
     // Metas pactuadas pra Unidade inteira
-    async getPactUnidade(req, res) {
+    async getMetaUnidade(req, res) {
         const cnes = req.params.cnes
         const ano = req.params.ano
         const mes = req.params.mes
 
-        let listaProfissionais = await db('profissionais').select('cns', 'mat', 'cbo', 'coef_ESAP').where({'cnes': cnes})
-        let diasUteis = await db('dias_uteis').select('dias_uteis').where({'ano': ano, 'mes': mes}).first()     
-        let listaProcedimentos = await db('pmp_padrao').select('nome', 'procedimento as cod').sum('quantidade as quantidade').where({'cnes': cnes})
-        .leftJoin('procedimentos', 'procedimentos.cod', 'pmp_padrao.procedimento').groupBy('procedimento').orderBy('procedimento')
-
-        for (let proc of listaProcedimentos) proc.quantidade = 0   
-        
-        for (let prof of listaProfissionais) {
-            let coefPact = await db('pmp_hist').select('coeficiente').where({'cns': prof.cns, 'mat': prof.mat, 'ano': ano, 'mes': mes}).first()
-            
-            let procedimentos = await db('pmp_padrao').select('procedimento as cod', 'quantidade').where({'cnes': cnes, 'cbo': prof.cbo})
-
-            if (procedimentos) {
-                for (let proc of procedimentos) {
-                    if (coefPact) proc.quantidade *= coefPact.coeficiente
-                    else proc.quantidade *= diasUteis.dias_uteis/20
-                    
-                    if (prof.coef_ESAP) proc.quantidade *= prof.coef_ESAP
-
-                    proc.quantidade = Math.ceil(proc.quantidade)
-
-                    for (let proced of listaProcedimentos) {
-                        if (proced.cod == proc.cod) {                            
-                            proced.quantidade += proc.quantidade                            
-                            continue
-                        }
-                    }
-                }
-            }           
-        }
-        res.status(200).json(listaProcedimentos)
+        const listaProcedimentos = await db.select('procedimento as cod', 'nome')
+        .sum('quantidade as quantidade')
+        .from('pmp_pactuados')
+        .where({'ano': ano, 'mes': mes, 'cnes': cnes})
+        .leftJoin('procedimentos', 'pmp_pactuados.procedimento', 'procedimentos.cod')
+        .groupBy('cod')
+        .orderBy('cod')
+        .then(lista => res.status(200).json(lista))
+        .catch(erro => res.status(500).send({message: erro}))
     }
 
     async listaUnidadesPact(req, res) {
@@ -136,52 +114,21 @@ class pactController {
         res.status(200).json(listaUnidades)
     }
 
-    async getPactDisa(req, res) {
+    async getMetaDisa(req, res) {
         const disa = req.params.disa
         const ano = req.params.ano
         const mes = req.params.mes
 
-        let listaProcedimentosDisa = []
-        let listaUnidades = await db('cnes').select('cnes').where({'disa': disa})
-        for (let unidade of listaUnidades) {            
-            let listaProfissionais = await db('profissionais').select('cns', 'mat', 'cbo', 'coef_ESAP').where({'cnes': unidade.cnes})
-            let diasUteis = await db('dias_uteis').select('dias_uteis').where({'ano': ano, 'mes': mes}).first()     
-            //let listaProcedimentos = await db('pmp_padrao').select('nome', 'procedimento as cod').sum('quantidade as quantidade').where({'cnes': unidade.cnes})
-            //.leftJoin('procedimentos', 'procedimentos.cod', 'pmp_padrao.procedimento').groupBy('procedimento').orderBy('procedimento')
-
-            //for (let proc of listaProcedimentos) proc.quantidade = 0   
-            
-            for (let prof of listaProfissionais) {
-                let coefPact = await db('pmp_hist').select('coeficiente').where({'cns': prof.cns, 'mat': prof.mat, 'ano': ano, 'mes': mes}).first()                
-                let procedimentos = await db('pmp_padrao').select('procedimento as cod', 'quantidade', 'nome').where({'cnes': unidade.cnes, 'cbo': prof.cbo})
-                .leftJoin('procedimentos', 'pmp_padrao.procedimento', 'procedimentos.cod').orderBy('cod')
-
-                if (procedimentos) {
-                    for (let proc of procedimentos) {
-                        if (coefPact) proc.quantidade *= coefPact.coeficiente
-                        else proc.quantidade *= diasUteis.dias_uteis/20
-                        
-                        if (prof.coef_ESAP) proc.quantidade *= prof.coef_ESAP
-
-                        proc.quantidade = Math.ceil(proc.quantidade)
-
-                        const existe = listaProcedimentosDisa.some(x => x.cod == proc.cod)
-                        if (existe) {
-                            const idx = listaProcedimentosDisa.findIndex(e => e.cod == proc.cod)
-                            listaProcedimentosDisa[idx].quantidade += proc.quantidade
-                        }
-                        else {
-                            listaProcedimentosDisa.push({
-                                cod: proc.cod,
-                                nome: proc.nome,
-                                quantidade: proc.quantidade
-                            })
-                        }
-                    }
-                }           
-            }            
-        }
-        res.status(200).json(listaProcedimentosDisa)
+        db.select('procedimento as cod', 'procedimentos.nome')
+        .sum('quantidade as quantidade')
+        .from('pmp_pactuados')
+        .leftJoin('procedimentos', 'pmp_pactuados.procedimento', 'procedimentos.cod')
+        .leftJoin('cnes', 'pmp_pactuados.cnes', 'cnes.cnes')
+        .where({'ano': ano, 'mes': mes, 'disa': disa})
+        .groupBy('cod')
+        .orderBy('cod')
+        .then(lista => res.status(200).json(lista))
+        .catch(e => res.status(500).send({message: e}))        
     }
 
     async getCoef(req, res) {
@@ -261,7 +208,7 @@ class pactController {
                 'fechado': true,
                 'justificativa': justificativa 
             })
-            .then(resp => res.status(200).json({resp, message: 'Pactuação realizada com sucesso'}))
+            .then()
             .catch(err => res.status(500).json(err))
         }
         else {
@@ -276,8 +223,12 @@ class pactController {
                 'fechado': true,
                 'justificativa': justificativa 
             }).where({'cns': cns, 'ano': ano, 'mes': mes})
-            .then(resp => res.status(200).json({resp, message: 'Pactuação atualizada com sucesso'}))
+            .then()
             .catch(err => res.status(500).json(err))
+        }
+        const meta_existe = await db('pmp_pactuado').select().where({'ano': ano, 'mes': mes, 'cns': cns, 'mat': mat}).first()
+        if (meta_existe) {
+            
         }
     }
     async getResponsabilidade(req, res) {

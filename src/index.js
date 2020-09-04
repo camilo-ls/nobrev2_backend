@@ -10,6 +10,7 @@ server.use(cors())
 server.use(bodyParser.json())
 server.use(bodyParser.urlencoded({ extended: false }))
 
+// Redirecionamento de rotas:
 const pactRoutes = require('./routes/pactRouter')
 server.use('/pact', pactRoutes)
 
@@ -27,6 +28,10 @@ server.use('/prof', profRoutes)
 
 const cboRoutes = require('./routes/cboRouter')
 server.use('/cbo', cboRoutes)
+
+// Atividades programadas:
+const renovarMetasDefault = require('./scheduled/renovarMetasDefault')
+renovarMetasDefault()
 
 server.get('/teste', (req, res) => {
     res.send('API funcionando')
