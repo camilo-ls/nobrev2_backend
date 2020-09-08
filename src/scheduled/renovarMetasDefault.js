@@ -16,9 +16,12 @@ const renovarMetasDefault = () => {
                     for (let funcionario of listaFuncionarios) {                        
                         const ja_pactuou = await db('pmp_pactuados').select().where({'ano': ano, 'mes': mes, 'cns': funcionario.cns, 'mat': funcionario.mat}).first()
                         if (!ja_pactuou) {
+                            let coeficiente_esap = await db('profissionais').select('coef_ESAP').where({'cns': cns, 'mat': mat}).first()
+                            if (coeficiente_esap) coeficiente_esap = coeficiente_esap.coef_esap
+                            else coeficiente_esap = 1
                             let coeficiente = await db('pmp_hist').select('coeficiente').where({'ano': ano, 'mes': mes, 'cns': funcionario.cns, 'mat': funcionario.mat}).first()
                             if (coeficiente) coeficiente = coeficiente.coeficiente
-                            else coeficiente = diasUteis.dias_uteis/20
+                            else coeficiente = diasUteis.dias_uteis/20 * coeficiente_esap
                             const listaProcedimentos = await db('pmp_padrao').select().where({'cnes': funcionario.cnes, 'cbo': funcionario.cbo})
                             if (listaProcedimentos) {
                                 for (let procedimento of listaProcedimentos) {

@@ -83,8 +83,8 @@ class pactController {
         .from('pmp_pactuados')
         .where({'ano': ano, 'mes': mes, 'cnes': cnes})
         .leftJoin('procedimentos', 'pmp_pactuados.procedimento', 'procedimentos.cod')
-        .groupBy('cod')
-        .orderBy('cod')
+        .groupBy('procedimento')
+        .orderBy('procedimento')
         .then(lista => res.status(200).json(lista))
         .catch(erro => res.status(500).send({message: erro}))
     }
