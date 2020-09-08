@@ -23,7 +23,6 @@ class pactController {
         for (let prof of listaProfissionais) {
             const idx = await listaProfissionais.findIndex(prof => !arrayCnes.includes(prof.cbo))           
             if (idx != -1) {
-                console.log(listaProfissionais[idx])
                 listaProfissionais.splice(idx, 1)
                 continue
             }
@@ -35,7 +34,6 @@ class pactController {
                 prof.cargo = resp.nome
             })
             .catch(e => {
-                console.log(e)
                 prof.cargo = 'INDEFINIDO' 
             })
             
@@ -192,7 +190,7 @@ class pactController {
 
     async setPactFuncionario(req, res) {
         const user = req.body
-        const { mes, ano, cnes, cns, mat, dias_pactuados, justificativa } = user
+        const { mes, ano, cnes, cbo, cns, mat, dias_pactuados, justificativa } = user
         const coeficiente = dias_pactuados/20
 
         const pactuado = await db('pmp_hist').select().where({'cns': cns, 'mat': mat, 'ano': ano, 'mes': mes}).first()
@@ -226,10 +224,23 @@ class pactController {
             .then()
             .catch(err => res.status(500).json(err))
         }
-        const meta_existe = await db('pmp_pactuado').select().where({'ano': ano, 'mes': mes, 'cns': cns, 'mat': mat}).first()
+        const meta_existe = await db('pmp_pactuados').select().where({'ano': ano, 'mes': mes, 'cns': cns, 'mat': mat}).first()
+        const listaProcedimentos = await db('pmp_padrao').select().where({'cnes': cnes, 'cbo': cbo})
         if (meta_existe) {
-            
+            for (let procedimento of listaProcedimentos) {
+                const novoValor = procedimento.quantidade * coeficiente
+                db('pmp_pactuados').update({'quantidade': novoValor}).where({'ano': ano, 'mes': mes, 'cns': cns, 'mat': mat, 'procedimento': procedimento.procedimento})
+                .catch(err => res.status(200).json(err))               
+            }
         }
+        else {
+            for (let procedimento of listaProcedimentos) {
+                const novoValor = procedimento.quantidade * coeficiente
+                db('pmp_pactuados').insert({'mes': mes, 'ano': ano, 'cnes': cnes, 'cns': cns, 'mat': mat, 'procedimento': procedimento.procedimento, 'quantidade': novoValor})
+                .catch(err => res.status(200).json({message: err}))
+            }
+        }
+        res.status(200).json({message: 'Pactuação atualizada com sucesso!'})
     }
     async getResponsabilidade(req, res) {
         const cnes = req.params.cnes
@@ -246,6 +257,38 @@ class pactController {
         const cpf = req.body.cpf
         await db('users').update('cnes_ativo')
         .where({})
+    }
+
+    async getAnosPactuados(req, res) {
+        const cnes = req.params.cnes
+        await db('pmp_pactuados').distinct('ano').where({'cnes': cnes})
+        .then(anos => res.status(200).json(anos))
+        .catch(e => res.status(500).json(e))
+    }
+
+    async getMesesPactuados(req, res) {
+        const cnes = req.params.cnes
+        const ano = req.params.ano
+        await db('pmp_pactuados').distinct('mes').where({'cnes': cnes, 'ano': ano})
+        .then(meses => res.status(200).json(meses))
+        .catch(e => res.status(500).json(e))
+    }
+
+    async getAnosPactuadosProfissional(req, res) {
+        const cns = req.params.cns
+        const mat = req.params.mat
+        await db('pmp_pactuados').distinct('ano').where({'cns': cns, 'mat': mat})
+        .then(anos => res.status(200).json(anos))
+        .catch(e => res.status(500).json(e))
+    }
+
+    async getMesesPactuadosProfissional(req, res) {
+        const ano = req.params.ano
+        const cns = req.params.cns
+        const mat = req.params.mat
+        await db('pmp_pactuados').distinct('mes').where({'cns': cns, 'mat': mat, 'ano': ano})
+        .then(meses => res.status(200).json(meses))
+        .catch(e => res.status(500).json(e))
     }
 }
 

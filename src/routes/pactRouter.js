@@ -14,6 +14,10 @@ router.get('/disa_pact/:ano/:mes/:disa', pactController.getMetaDisa)
 router.get('/faltam_pactuar/:ano/:mes/:disa', pactController.listaUnidadesPact)
 router.get('/responsabilidade/:cnes', pactController.getResponsabilidade)
 router.get('/data_revisao/:ano/:mes', pactController.getDataRevisao)
+router.get('/anos/:cnes', pactController.getAnosPactuados)
+router.get('/meses/:ano/:cnes', pactController.getMesesPactuados)
+router.get('/profissional/anos/:cns/:mat', pactController.getAnosPactuadosProfissional)
+router.get('/profissional/meses/:ano/:cns/:mat', pactController.getMesesPactuadosProfissional)
 
 router.post('/pactuar', pactController.setPactFuncionario)
 

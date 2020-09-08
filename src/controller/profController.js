@@ -14,7 +14,7 @@ class profController {
         const dias_uteis = await db('dias_uteis').select('dias_uteis').where({'ano': ano, 'mes': mes}).first()
         let pact_user = await db('pmp_hist').select('coeficiente').where({'cns': cns, 'mat': mat, 'mes': mes, 'ano': ano}).first()       
         if (pact_user) pact_user = pact_user.coeficiente
-        else pact_user = dias_uteis.dias_uteis/20        
+        else pact_user = dias_uteis.dias_uteis/20   
             
         await db.select('profissionais.nome as profissional', 'procedimentos.nome', 'pmp_padrao.procedimento as cod', 'pmp_padrao.quantidade')
         .from('pmp_padrao')
