@@ -252,13 +252,24 @@ class pactController {
         .catch(e => res.status(500).json(e))
     }
 
-    async setCnesAtivo(req, res) {
-        const cnes = req.body.cnes
-        const cpf = req.body.cpf
-        await db('users').update('cnes_ativo')
-        .where({})
+    async getAnosDisa(req, res) {
+        const disa = req.params.disa
+        await db('pmp_pactuados').distinct('ano').leftJoin('cnes', 'pmp_pactuados.cnes', 'cnes.cnes')
+        .where({'disa': disa})
+        .then(anos => res.status(200).json(anos))
+        .catch(e => res.status(500).json(e))
     }
 
+    async getMesesDisa(req, res) {
+        const disa = req.params.disa
+        const ano = req.params.ano
+        await db('pmp_pactuados').distinct('mes').leftJoin('cnes', 'pmp_pactuados.cnes', 'cnes.cnes')
+        .where({'disa': disa, 'ano': ano})
+        .then(meses => res.status(200).json(meses))
+        .catch(e => res.status(500).json(e))
+    }
+
+    
     async getAnosPactuados(req, res) {
         const cnes = req.params.cnes
         await db('pmp_pactuados').distinct('ano').where({'cnes': cnes})
