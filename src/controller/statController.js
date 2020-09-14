@@ -13,7 +13,7 @@ class statController {
     }
 
     async delete(req, res) {
-        const id = req.body.id
+        const id = req.params.id
 
         await db('tb_estatisticas_hist').where({'id': id}).del()
         .then(resp => res.status(200).json(resp))
@@ -38,7 +38,15 @@ class statController {
         const cns = req.params.cns
         await db('tb_estatisticas_hist').select().where({'cns': cns})
         .leftJoin('tb_estatisticas_proced', 'tb_estatisticas_hist.procedimento', 'tb_estatisticas_proced.cod')
-        .orderBy('ano', 'mes', 'dia')
+        .orderBy([{column: 'ano', order: 'desc'}, {column: 'mes', order: 'desc'}, {column: 'dia', order: 'desc'}])
+        .then(resp => res.status(200).json(resp))
+        .catch(e => res.status(500).json(e))
+    }
+
+    async listAll(req, res) {
+        await db('tb_estatisticas_hist').select('ano', 'mes', 'agravo', 'nome').sum('quantidade as quantidade')
+        leftJoin('tb_estatisticas_proced', 'tb_estatisticas_hist.procedimento', 'tb_estatisticas_proced.cod')
+        .groupBy('nome', 'mes', 'ano')
         .then(resp => res.status(200).json(resp))
         .catch(e => res.status(500).json(e))
     }
