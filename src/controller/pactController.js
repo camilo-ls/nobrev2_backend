@@ -301,6 +301,19 @@ class pactController {
         .then(meses => res.status(200).json(meses))
         .catch(e => res.status(500).json(e))
     }
+  
+    async getAnosSemsa(req, res) {
+        await db('pmp_pactuados').distinct('ano')
+            .then(anos => res.status(200).json(anos))
+        .catch(e => res.status(500).json(e))
+    }
+
+    async getMesesSemsa(req, res) {
+        const ano = req.params.ano
+        await db('pmp_pactuados').distinct('mes').where({ 'ano': ano })
+            .then(meses => res.status(200).json(meses))
+        .catch(e => res.status(500).json(e))
+    }
 }
 
 module.exports = new pactController()

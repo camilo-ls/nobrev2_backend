@@ -20,6 +20,8 @@ router.get('/profissional/anos/:cns/:mat', pactController.getAnosPactuadosProfis
 router.get('/profissional/meses/:ano/:cns/:mat', pactController.getMesesPactuadosProfissional)
 router.get('/disa/anos/:disa', pactController.getAnosDisa)
 router.get('/disa/meses/:ano/:disa', pactController.getMesesDisa)
+router.get('/semsa/anos', pactController.getAnosSemsa)
+router.get('/semsa/meses/:ano', pactController.getMesesSemsa)
 
 router.post('/pactuar', pactController.setPactFuncionario)
 
