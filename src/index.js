@@ -12,31 +12,31 @@ server.use(bodyParser.urlencoded({ extended: false }))
 
 // Redirecionamento de rotas:
 const statRouter = require('./routes/statRouter')
-server.use('/stat', statRouter)
+server.use('/nobre/api/stat', statRouter)
 
 const pactRoutes = require('./routes/pactRouter')
-server.use('/pact', pactRoutes)
+server.use('/nobre/api/pact', pactRoutes)
 
 const authRoutes = require('./routes/authRouter')
-server.use('/auth', authRoutes)
+server.use('/nobre/api/auth', authRoutes)
 
 const userRoutes = require('./routes/userRoutes')
-server.use('/user', userRoutes)
+server.use('/nobre/api/user', userRoutes)
 
 const cnesRoutes = require('./routes/cnesRouter')
-server.use('/cnes', cnesRoutes)
+server.use('/nobre/api/cnes', cnesRoutes)
 
 const profRoutes = require('./routes/profRouter')
-server.use('/prof', profRoutes)
+server.use('/nobre/api/prof', profRoutes)
 
 const cboRoutes = require('./routes/cboRouter')
-server.use('/cbo', cboRoutes)
+server.use('/nobre/api/cbo', cboRoutes)
 
 // Atividades programadas:
 const renovarMetasDefault = require('./scheduled/renovarMetasDefault')
 renovarMetasDefault()
 
-server.get('/teste', (req, res) => {
+server.get('/nobre/api/teste', (req, res) => {
     res.send('API funcionando')
 })
 

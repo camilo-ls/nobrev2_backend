@@ -2,6 +2,8 @@ const express = require('express')
 const router = express.Router()
 
 const pactController = require('../controller/pactController')
+const pactValidator = require('../middlewares/pactValidator')
+const pactRouter = require('../middlewares/pactValidator')
 
 router.get('/coef/:ano/:mes/:cns/:mat', pactController.getCoef)
 router.get('/data', pactController.getData)
@@ -23,6 +25,6 @@ router.get('/disa/meses/:ano/:disa', pactController.getMesesDisa)
 router.get('/semsa/anos', pactController.getAnosSemsa)
 router.get('/semsa/meses/:ano', pactController.getMesesSemsa)
 
-router.post('/pactuar', pactController.setPactFuncionario)
+router.post('/pactuar', pactValidator, pactController.setPactFuncionario)
 
 module.exports = router
