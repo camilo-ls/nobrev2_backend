@@ -48,7 +48,6 @@ class profController {
         const cns = req.params.cns
         await db('profissionais').select('id', 'cpf', 'cns', 'mat', 'nome', 'cbo', 'cnes')
         .where({'cns': cns})
-        .first()
         .then(retorno => res.json(retorno))
         .catch(err => res.status(500).send({message: 'CPF não encontrado.', err}))
     }
