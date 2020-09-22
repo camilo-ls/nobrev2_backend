@@ -40,7 +40,6 @@ class profController {
         .leftJoin('cbo', 'profissionais.cbo', 'cbo.cbo')
         .leftJoin('pmp_hist', 'pmp_hist.mat', 'profissionais.mat')
         .where({'pmp_hist.ano': ano, 'pmp_hist.mes': mes, 'profissionais.cns': cns, 'profissionais.mat': mat})
-        .first()
         .then(retorno => res.json(retorno))
         .catch(err => res.status(500).send({message: 'CNS não encontrado.', err}))
     }
