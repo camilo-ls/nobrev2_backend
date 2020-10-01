@@ -318,8 +318,8 @@ class pactController {
 
     async renovarMetasDefault(req, res) {
         console.log('> Preenchendo as metas padrão do mês...')
-        const ano = req.body.ano
-        const mes = req.body.mes        
+        const data = req.body
+        const { ano, mes } = data
         const diasUteis = await db('dias_uteis').select('dias_uteis').where({
             'ano': ano,
             'mes': mes
