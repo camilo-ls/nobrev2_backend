@@ -26,5 +26,6 @@ router.get('/semsa/anos', pactController.getAnosSemsa)
 router.get('/semsa/meses/:ano', pactController.getMesesSemsa)
 
 router.post('/pactuar', pactValidator, pactController.setPactFuncionario)
+router.post('/renovar_metas/:ano/:mes', pactController.renovarMetasDefault)
 
 module.exports = router
