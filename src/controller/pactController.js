@@ -327,7 +327,7 @@ class pactController {
             }).first()
         }
         const listaUnidades = await db('pmp_padrao').distinct('cnes')
-        if (listaUnidades) {
+        if (listaUnidades && diasUteis) {
             for (let unidade of listaUnidades) {
                 const listaFuncionarios = await db('profissionais').select().where({
                     'cnes': unidade.cnes
