@@ -10,14 +10,12 @@ class pactController {
         let listaProfissionais = await db('profissionais').select('nome', 'cns', 'mat', 'cbo')
         .where({'cnes': cnes}).orderBy('cbo', 'nome')
         
-        const listaCnes = await db('pmp_padrao').select('cbo').where({'cnes': cnes})
+        const listaCnes = await db('pmp_padrao').distinct('cbo').where({'cnes': cnes})
 
         let arrayCnes = []
 
-        for (let cbo of listaCnes) {
-            if (!arrayCnes.includes(cbo.cbo)) {
-                arrayCnes.push(cbo.cbo)
-            }
+        for (let cbo of listaCnes) {           
+            arrayCnes.push(cbo.cbo)
         }
 
         for (let prof of listaProfissionais) {
@@ -224,7 +222,7 @@ class pactController {
             .then()
             .catch(err => res.status(500).json(err))
         }
-        const meta_existe = await db('pmp_pactuados').select().where({'ano': ano, 'mes': mes, 'cns': cns, 'mat': mat}).first()
+        const meta_existe = await db('pmp_pactuados').select().where({'ano': ano, 'mes': mes, 'cnes': cnes, 'mat': mat}).first()
         const listaProcedimentos = await db('pmp_padrao').select().where({'cnes': cnes, 'cbo': cbo})
         if (meta_existe) {
             for (let procedimento of listaProcedimentos) {
@@ -243,6 +241,7 @@ class pactController {
         }
         res.status(200).json({message: 'Pactuação atualizada com sucesso!'})
     }
+
     async getResponsabilidade(req, res) {
         const cnes = req.params.cnes
         await db.select('responsabilidade.filho as cnes', 'cnes.nome')
@@ -269,7 +268,6 @@ class pactController {
         .then(meses => res.status(200).json(meses))
         .catch(e => res.status(500).json(e))
     }
-
     
     async getAnosPactuados(req, res) {
         const cnes = req.params.cnes
@@ -319,9 +317,9 @@ class pactController {
     async renovarMetasDefault(req, res) {
         console.log('> Preenchendo as metas padrão do mês...')
         const data = req.body
-        const { ano, mes } = data
+        const { ano, mes } = data        
         if (ano && mes) {
-            const diasUteis = await db('dias_uteis').select('dias_uteis').where({
+            let diasUteis = await db('dias_uteis').select('dias_uteis').where({
                 'ano': ano,
                 'mes': mes
             }).first()
@@ -374,7 +372,7 @@ class pactController {
             }
         }
         console.log('> Finalizou...')
-        res.status(200).json({message: 'Finalizou', ano: ano, mes: mes})     
+        res.status(200).json({message: 'Finalizou', ano: ano, mes: mes})
     }
 }
 
