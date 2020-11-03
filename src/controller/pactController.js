@@ -227,7 +227,7 @@ class pactController {
         if (meta_existe) {
             for (let procedimento of listaProcedimentos) {
                 const novoValor = procedimento.quantidade * coeficiente
-                db('pmp_pactuados').update({'quantidade': novoValor}).where({'ano': ano, 'mes': mes, 'cns': cns, 'mat': mat, 'procedimento': procedimento.procedimento})
+                db('pmp_pactuados').update({'quantidade': novoValor}).where({'ano': ano, 'mes': mes, 'cnes': cnes, 'mat': mat, 'procedimento': procedimento.procedimento})
                 .catch(err => res.status(200).json(err))               
             }
         }
