@@ -318,12 +318,7 @@ class pactController {
         console.log('> Preenchendo as metas padrão do mês...')
         const data = req.body
         const { ano, mes } = data        
-        if (ano && mes) {
-            let diasUteis = await db('dias_uteis').select('dias_uteis').where({
-                'ano': ano,
-                'mes': mes
-            }).first()
-        }
+        let diasUteis = await db('dias_uteis').select('dias_uteis').where({'ano': ano, 'mes': mes}).first()
         const listaUnidades = await db('pmp_padrao').distinct('cnes')
         if (listaUnidades && diasUteis) {
             for (let unidade of listaUnidades) {
