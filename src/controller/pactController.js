@@ -218,7 +218,7 @@ class pactController {
                 'dias_pactuados': dias_pactuados,
                 'fechado': true,
                 'justificativa': justificativa 
-            }).where({'cns': cns, 'ano': ano, 'mes': mes})
+            }).where({'cnes': cnes, 'mat': mat, 'ano': ano, 'mes': mes}).first()
             .then()
             .catch(err => res.status(500).json(err))
         }
