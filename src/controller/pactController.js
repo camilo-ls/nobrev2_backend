@@ -191,7 +191,7 @@ class pactController {
         const { mes, ano, cnes, cbo, cns, mat, dias_pactuados, justificativa } = user
         const coeficiente = dias_pactuados/20
 
-        const pactuado = await db('pmp_hist').select().where({'cnes': cnes, 'mat': mat, 'ano': ano, 'mes': mes}).first()
+        const pactuado = await db('pmp_hist').select().where({'cnes': cnes, 'cns': cns, 'mat': mat, 'ano': ano, 'mes': mes}).first()
         if (!pactuado) {
             await db('pmp_hist').insert({
                 'mes': mes,
@@ -218,7 +218,7 @@ class pactController {
                 'dias_pactuados': dias_pactuados,
                 'fechado': true,
                 'justificativa': justificativa 
-            }).where({'cnes': cnes, 'mat': mat, 'ano': ano, 'mes': mes}).first()
+            }).where({'cnes': cnes, 'cns': cns, 'mat': mat, 'ano': ano, 'mes': mes})
             .then()
             .catch(err => res.status(500).json(err))
         }
