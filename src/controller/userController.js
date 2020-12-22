@@ -7,12 +7,12 @@ class userController {
     async create(req, res) {
         const user = {...req.body}
                    
-        const checkEmail = await db('users').select('email').where({'email': user.email}).first()
+        const checkEmail = await db('users').select('EMAIL').where({'EMAIL': user.email}).first()
         if (checkEmail) {
             return res.status(400).send({message: 'E-mail já cadastrado'})
         }
 
-        const checkCpf = await db('users').select('cpf').where({'cpf': user.cpf}).first()
+        const checkCpf = await db('users').select('CPF').where({'CPF': user.cpf}).first()
         if (checkCpf) {
             return res.status(400).send({message: 'CPF já cadastrado'})
         }
@@ -20,8 +20,8 @@ class userController {
         const hashedPassword = await bcrypt.hash(user.password, 10)
         user.password = hashedPassword
 
-        const user_cbo = await db('profissionais').select('cbo').where({'cpf': user.cpf}).first()
-        if (user_cbo.cbo == 131210) user.nivel = 1
+        const user_cbo = await db('profissionais').select('CBO').where({'CPF': user.cpf}).first()
+        if (user_cbo.CBO == 131210) user.nivel = 1
         
         await db('users').insert(user)
         .then(userId => { 
@@ -38,22 +38,22 @@ class userController {
         const user = {...req.body}
         const id = req.params.id
         await db('users').update(user)
-        .where({'id': id})
+        .where({'ID': id})
         .then(result => res.status(200).send('Sucesso'))
         .catch(err => res.status(400).send(err.message))
     }
 
     async all(req, res) {
-        await db('users').select('id', 'nome', 'email', 'admin', 'nivel', 'ativo')
-        .orderBy('nome', 'desc')
+        await db('users').select('ID', 'NOME', 'EMAIL', 'ADMIN', 'NIVEL', 'ATIVO')
+        .orderBy('NOME', 'desc')
         .then(lista => res.json(lista))
         .catch(err => res.status(500).send(err.message))
     }
 
     async get(req, res) {
         const id = req.params.id
-        await db('users').select('id', 'nome', 'email', 'admin', 'nivel', 'ativo')
-        .where({'id': id}).first()
+        await db('users').select('ID', 'NOME', 'EMAIL', 'ADMIN', 'NIVEL', 'ATIVO')
+        .where({'ID': id}).first()
         .then(resultado => {
             if (resultado) {
                 res.json(resultado)
@@ -68,22 +68,21 @@ class userController {
     async login(req, res) {        
         const email = req.body.email
         const password = req.body.password
-        await db('users').select('id', 'nome', 'email', 'password', 'admin', 'nivel', 'ativo', 'cnes', 'cpf')
-        .where({'email': email}).first()
+        await db('users').select('ID', 'NOME', 'EMAIL', 'PASSWORD', 'ADMIN', 'NIVEL', 'ATIVO', 'CNES', 'CPF')
+        .where({'EMAIL': email}).first()
         .then(async resultado => {
             if (resultado) {
-                if (bcrypt.compareSync(password, resultado.password)) {
-                    await db('profissionais').select('cns', 'mat')
-                    .where({'cpf': resultado.cpf}).first()
+                if (bcrypt.compareSync(password, resultado.PASSWORD)) {
+                    await db('profissionais').select('CNS', 'VINC_ID')
+                    .where({'CPF': resultado.CPF}).first()
                     .then(cns => {
                         const payload = {
-                            id: resultado.id,
-                            nome: resultado.nome,
-                            nivel: resultado.nivel,
-                            admin: resultado.admin,
-                            cnes: resultado.cnes,
-                            cns: cns.cns,
-                            mat: cns.mat
+                            id: resultado.VINC_ID,
+                            nome: resultado.NOME,
+                            nivel: resultado.NIVEL,
+                            admin: resultado.ADMIN,
+                            cnes: resultado.CNES,
+                            cns: cns.CNS
                         }                    
                         jwt.sign(payload, authSecret, { expiresIn: '1h' }, (err, token) => {
                             res.json({token: token})                  

@@ -1,4 +1,4 @@
 node_modules
 .env
 src/config/config.js
-./knexfile.js
+knexfile.js

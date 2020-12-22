@@ -8,9 +8,12 @@ const server = express()
 // Middlewares
 server.use(cors())
 server.use(bodyParser.json())
-server.use(bodyParser.urlencoded({extended: false}))
+server.use(bodyParser.urlencoded({ extended: false }))
 
 // Redirecionamento de rotas:
+const statRouter = require('./routes/statRouter')
+server.use('/nobre/api/stat', statRouter)
+
 const pactRoutes = require('./routes/pactRouter')
 server.use('/nobre/api/pact', pactRoutes)
 

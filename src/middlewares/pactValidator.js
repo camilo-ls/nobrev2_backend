@@ -1,5 +1,5 @@
 const pactValidator = async (req, res, next) => {
-    const { nome, cns, mat, cbo, dias_pactuados, fechado, cnes, ano, mes, justificativa, dias_mes } = req.body
+    const { nome, cns, vinc_id, cbo, dias_pactuados, fechado, cnes, ano, mes, justificativa, dias_mes } = req.body
     if (dias_pactuados != dias_mes) {
         if (justificativa == 'Selecione...' || justificativa.length < 3) {
             res.status(400).json({

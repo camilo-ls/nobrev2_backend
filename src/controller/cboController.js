@@ -3,8 +3,8 @@ const db = require('../config/database')
 class cboController {
     async get(req, res) {
         const cbo = req.params.cbo
-        await db('cbo').select('cbo', 'nome')
-        .where({'cbo': cbo})
+        await db('cbo').select('CBO', 'NOME_CBO')
+        .where({'CBO': cbo})
         .first()
         .then(resultado => {
             res.json(resultado)

@@ -3,10 +3,10 @@ const db = require('../config/database')
 class cnesController {
     async getFuncionarios(req, res) {
         const cnes = req.params.cnes
-        await db.select('profissionais.id', 'profissionais.cnes', 'profissionais.nome', 'cns', 'profissionais.cbo', 'cbo.nome as cbo_nome', 'ine')
-        .from('profissionais').join('cbo', {'profissionais.cbo': 'cbo.cbo'})
-        .where({'profissionais.cnes': cnes})
-        .orderBy('profissionais.nome')
+        await db.select('profissionais.VINC_ID', 'profissionais.CNES', 'profissionais.NOME_PROF', 'CNS', 'profissionais.CBO', 'cbo.NOME_CBO', 'INE')
+        .from('profissionais').join('cbo', {'profissionais.CBO': 'cbo.CBO'})
+        .where({'profissionais.CNES': cnes})
+        .orderBy('profissionais.NOME_PROF')
         .then(lista => {
             res.json(lista)
         })
@@ -15,23 +15,23 @@ class cnesController {
 
     async getProcUnidade(req, res) {
         const cnes = req.params.cnes
-        await db.select('procedimento', 'procedimentos.nome').sum('quantidade as pactuado')
+        await db.select('pmp_padrao.COD_PROCED', 'procedimentos.NOME_PROCED').sum('QUANTIDADE as PACTUADO')
         .from('profissionais')
-        .join('pmp_padrao', 'profissionais.cbo', '=', 'pmp_padrao.cbo')
-        .join('procedimentos', 'procedimento', '=', 'procedimentos.cod')
-        .where({'profissionais.cnes': cnes})
-        .groupBy('procedimento')
+        .join('pmp_padrao', 'profissionais.CBO', '=', 'pmp_padrao.CBO')
+        .join('procedimentos', 'pmp_padrao.COD_PROCED', '=', 'procedimentos.COD_PROCED')
+        .where({'profissionais.CNES': cnes})
+        .groupBy('COD_PROCED')
         .then(lista => res.json(lista))
         .catch(err => res.status(500).send(err))
     }
 
     async getPactFuncionario(req, res) {
         const cns = req.params.cns
-        const mat = req.params.mat
+        const vinc_id = req.params.vinc_id
         const ano = req.params.ano
         const mes = req.params.mes
-        await db.select('dias_pactuados', 'fechado', 'justificativa')
-        .from('pmp_hist').where({'mat': mat, 'cns': cns})
+        await db.select('DIAS_PACTUADOS', 'FECHADO', 'JUSTIFICATIVA')
+        .from('pmp_hist').where({'VINC_ID': VINC_ID})
         .andWhere({'ano': ano})
         .andWhere({'mes': mes})
         .first()
@@ -43,7 +43,7 @@ class cnesController {
 
     async all(req, res) {
         await db('cnes')
-        .select('cnes', 'nome', 'bairro', 'tipologia', 'tipo')
+        .select('CNES', 'NOME_UNIDADE', 'BAIRRO', 'DISA')
         .then(lista => res.json(lista))
         .catch(err => res.status(500).send(err))
     }
@@ -51,8 +51,8 @@ class cnesController {
     async get(req, res) {
         const cnes = req.params.cnes
         await db('cnes')
-        .select('cnes', 'nome', 'bairro', 'tipologia', 'tipo')
-        .where({'cnes': cnes})
+        .select('CNES', 'NOME_UNIDADE', 'BAIRRO', 'DISA')
+        .where({'CNES': cnes})
         .first()
         .then(resultado => {
             if (resultado) {

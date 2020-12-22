@@ -3,14 +3,14 @@
 module.exports = {
   client: 'mysql',
   connection: {
-    host: 'dcid.semsa',    
+    host: 'localhost',    
     database: 'nobre',
-    user:     'nobre',
-    password: 'gretinha'
+    user:     'root',
+    password: 'root'
   },
   pool: {
-    min: 2,
-    max: 10
+    min: 1,
+    max: 5
   },
   migrations: {
     tableName: 'knex_migrations'
