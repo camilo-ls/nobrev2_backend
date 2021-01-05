@@ -51,18 +51,20 @@ class pactController {
             })
             .catch(e => console.log(e))
             let prof_aux = {
-                'mes': mes,
-                'ano': ano,
-                'cnes': cnes,
-                'cns': prof.CNS,
-                'vinc_id': prof.VINC_ID,
-                'coeficiente': prof.DIAS_PACTUADOS/20,
-                'dias_pactuados': prof.DIAS_PACTUADOS,
-                'fechado': prof.FECHADO,
-                'justificativa': prof.JUSTIFICATIVA 
+                mes: mes,
+                ano: ano,
+                cnes: cnes,
+                cns: prof.CNS,
+                vinc_id: prof.VINC_ID,
+                coeficiente: prof.DIAS_PACTUADOS/20,
+                dias_pactuados: prof.DIAS_PACTUADOS,
+                fechado: prof.FECHADO,
+                justificativa: prof.JUSTIFICATIVA 
             }
-            const ja_existe = await db('pmp_hist').select().where({'MES': prof_aux.mes, 'ANO': prof_aux.ano, 'CNS': prof_aux.cns, 'VINC_ID': prof_aux.vinc_id}).first()
-            if (!ja_existe) await db('pmp_hist').insert(prof_aux)           
+            const ja_existe = await db('pmp_hist').select().where({'MES': prof_aux.mes, 'ANO': prof_aux.ano, 'VINC_ID': prof_aux.vinc_id})
+            if (!ja_existe) {
+                await db('pmp_hist').insert(prof_aux)
+            }           
         }
         if (!listaProfissionais) res.status(400).send({message: 'Não existem profissionais na unidade selecionada'})
         res.status(200).send(listaProfissionais)
@@ -156,8 +158,10 @@ class pactController {
 
     async getData(req, res) {
         const data = {
-            ano: new Date().getFullYear(),
-            mes: new Date().getMonth() + 1,
+            //ano: new Date().getFullYear(),
+            //mes: new Date().getMonth() + 1,
+            ano: 2020,
+            mes: 12,
             dia: new Date().getDate()
         }
         res.status(200).json(data)
@@ -208,7 +212,7 @@ class pactController {
                 'JUSTIFICATIVA': justificativa 
             })
             .then()
-            .catch(err => res.status(500).json(err))
+            .catch(err => res.status(500))
         }
         else {
             await db('pmp_hist').update({
@@ -223,7 +227,7 @@ class pactController {
                 'JUSTIFICATIVA': justificativa 
             }).where({'VINC_ID': vinc_id, 'ANO': ano, 'MES': mes})
             .then()
-            .catch(err => res.status(500).json(err))
+            .catch(err => res.status(500))
         }
         const meta_existe = await db('pmp_pactuados').select().where({'ANO': ano, 'MES': mes, 'VINC_ID': vinc_id})
         const listaProcedimentos = await db('pmp_padrao').select().where({'CNES': cnes, 'CBO': cbo})
@@ -231,7 +235,7 @@ class pactController {
             for (let procedimento of listaProcedimentos) {
                 const novoValor = procedimento.quantidade * coeficiente
                 db('pmp_pactuados').update({'QUANTIDADE': novoValor}).where({'ANO': ano, 'MES': mes, 'CNES': cnes, 'VINC_ID': vinc_id, 'COD_PROCED': procedimento.COD_PROCED})
-                .catch(err => res.status(200).json(err))               
+                .catch(err => res.status(500))            
             }
         }
         else {
