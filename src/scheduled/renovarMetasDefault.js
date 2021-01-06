@@ -2,37 +2,37 @@ const scheduler = require('node-schedule')
 const db = require('../config/database')
 
 const renovarMetasDefault = () => {
-    scheduler.scheduleJob('0 0 0-5 1-3 * *', async () => {
+    scheduler.scheduleJob({hour: 1, minute: 30}, async () => {
+        const tempoComeco = new Date()
         console.log('> Preenchendo as metas padrão do mês...')
-        const ano = new Date().getFullYear()
-        const mes = new Date().getMonth() + 1 // + 1 // próximo mês
-        const diasUteis = await db('dias_uteis').select('dias_uteis').where({'ano': ano, 'mes': mes}).first()
-        const listaUnidades = await db('pmp_padrao').distinct('cnes')
-        if (listaUnidades) {
-            for (let unidade of listaUnidades) {                
-                const listaFuncionarios = await db('profissionais').select().where({'cnes': unidade.cnes})
-                if (listaFuncionarios) {
-                    for (let funcionario of listaFuncionarios) {                        
-                        const ja_pactuou = await db('pmp_pactuados').select().where({'ano': ano, 'mes': mes, 'cns': funcionario.cns, 'mat': funcionario.mat}).first()
-                        if (!ja_pactuou) {
-                            let coeficiente_esap = parseFloat(funcionario.coef_ESAP)                            
-                            let coeficiente = await db('pmp_hist').select('coeficiente').where({'ano': ano, 'mes': mes, 'cns': funcionario.cns, 'mat': funcionario.mat}).first()
-                            if (coeficiente) coeficiente = coeficiente.coeficiente
-                            else coeficiente = (diasUteis.dias_uteis/20) * coeficiente_esap
-                            const listaProcedimentos = await db('pmp_padrao').select().where({'cnes': funcionario.cnes, 'cbo': funcionario.cbo})
-                            if (listaProcedimentos) {
-                                for (let procedimento of listaProcedimentos) {
-                                    db('pmp_pactuados').insert({'ano': ano, 'mes': mes, 'cnes': funcionario.cnes, 'cns': funcionario.cns, 'mat': funcionario.mat,
-                                    'procedimento': procedimento.procedimento, 'quantidade': Math.ceil(procedimento.quantidade * coeficiente)})
-                                    .then().catch()
-                                }
-                            }
-                        }
-                    }
-                }                
+        const { ano, mes } = req.body
+        let diasUteis = await db('dias_uteis').select('DIAS_UTEIS').where({'ANO': ano, 'MES': mes}).first()
+        diasUteis = diasUteis.DIAS_UTEIS
+        
+        await db('pmp_pactuados').delete().where({'ANO': ano, 'MES': mes})
+
+        const listaProfissionais = await db('profissionais').select()
+
+        for (let prof of listaProfissionais) {
+            console.log('>>>', listaProfissionais.indexOf(prof), 'de', listaProfissionais.length)
+            const listaProcedimentos = await db('pmp_padrao').select('COD_PROCED', 'QUANTIDADE').where({'CNES': prof.CNES, 'CBO': prof.CBO})
+            let coefPact = diasUteis/20
+            const jaPactuado = await db('pmp_hist').select('COEFICIENTE').where({'ANO': ano, 'MES': mes, 'VINC_ID': prof.VINC_ID}).first()
+            if (jaPactuado) {   
+                coefPact = jaPactuado.COEFICIENTE
+            }
+            else {
+                await db('pmp_hist').insert({'MES': mes, 'ANO': ano, 'CNES': prof.CNES, 'CNS': prof.CNS, 'VINC_ID': prof.VINC_ID, 'mat': 0, 'COEFICIENTE': coefPact, 'DIAS_PACTUADOS': diasUteis, 'FECHADO': 0, 'JUSTIFICATIVA': null})
+            }
+
+            for (let proced of listaProcedimentos) {
+                await db('pmp_pactuados').insert({'MES': mes, 'ANO': ano, 'CNES': prof.CNES, 'INE': prof.INE, 'CNS': prof.CNS, 'VINC_ID': prof.VINC_ID, 'mat': 0, 'PROCEDIMENTO': proced.COD_PROCED, 'QUANTIDADE': Math.round(proced.QUANTIDADE * coefPact)})
             }
         }
-        console.log('> Finalizou...')
+        const tempoFinal = new Date()
+        const tempoPassado = (tempoFinal - tempoComeco)/1000
+        const tempoMinutos = tempoPassado/60
+        console.log('> Finalizado em', tempoMinutos, 'minutos')
     })    
 }
 

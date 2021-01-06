@@ -325,56 +325,30 @@ class pactController {
         console.log('> Preenchendo as metas padrão do mês...')
         const { ano, mes } = req.body
         let diasUteis = await db('dias_uteis').select('DIAS_UTEIS').where({'ANO': ano, 'MES': mes}).first()
-        console.log(diasUteis)
-        const listaUnidades = await db('pmp_padrao').distinct('CNES')
-        if (listaUnidades && diasUteis) {
-            for (let unidade of listaUnidades) {
-                const listaFuncionarios = await db('profissionais').select().where({
-                    'CNES': unidade.CNES
-                })
-                if (listaFuncionarios) {
-                    for (let funcionario of listaFuncionarios) {
-                        const ja_pactuou = await db('pmp_pactuados').select().where({
-                            'ANO': ano,
-                            'MES': mes,
-                            'CNS': funcionario.CNS,
-                            'VINC_ID': funcionario.VINC_ID
-                        }).first()
-                        if (!ja_pactuou) {
-                            let coeficiente_esap = parseFloat(funcionario.COEF_ESAP)
-                            let coeficiente = await db('pmp_hist').select('COEFICIENTE').where({
-                                'ANO': ano,
-                                'MES': mes,
-                                'CNS': funcionario.CNS,
-                                'VINC_ID': funcionario.VINC_ID
-                            }).first()
-                            if (coeficiente) coeficiente = coeficiente.COEFICIENTE
-                            else coeficiente = (diasUteis.DIAS_UTEIS / 20) * coeficiente_esap
-                            const listaProcedimentos = await db('pmp_padrao').select().where({
-                                'CNES': funcionario.CNES,
-                                'CBO': funcionario.CBO
-                            })
-                            if (listaProcedimentos) {
-                                for (let procedimento of listaProcedimentos) {
-                                    db('pmp_pactuados').insert({
-                                            'ANO': ano,
-                                            'MES': mes,
-                                            'CNES': funcionario.CNES,
-                                            'CNS': funcionario.CNS,
-                                            'VINC_ID': funcionario.VINC_ID,
-                                            'PROCEDIMENTO': procedimento.COD_PROCED,
-                                            'QUANTIDADE': Math.ceil(procedimento.QUANTIDADE * coeficiente)
-                                        })
-                                        .then().catch()
-                                }
-                            }
-                        }
-                    }
-                }
+        diasUteis = diasUteis.DIAS_UTEIS
+        
+        await db('pmp_pactuados').delete().where({'ANO': ano, 'MES': mes})
+
+        const listaProfissionais = await db('profissionais').select()
+
+        for (let prof of listaProfissionais) {
+            console.log('>>>', listaProfissionais.indexOf(prof), 'de', listaProfissionais.length)
+            const listaProcedimentos = await db('pmp_padrao').select('COD_PROCED', 'QUANTIDADE').where({'CNES': prof.CNES, 'CBO': prof.CBO})
+            let coefPact = diasUteis/20
+            const jaPactuado = await db('pmp_hist').select('COEFICIENTE').where({'ANO': ano, 'MES': mes, 'VINC_ID': prof.VINC_ID}).first()
+            if (jaPactuado) {   
+                coefPact = jaPactuado.COEFICIENTE
+            }
+            else {
+                await db('pmp_hist').insert({'MES': mes, 'ANO': ano, 'CNES': prof.CNES, 'CNS': prof.CNS, 'VINC_ID': prof.VINC_ID, 'mat': 0, 'COEFICIENTE': coefPact, 'DIAS_PACTUADOS': diasUteis, 'FECHADO': 0, 'JUSTIFICATIVA': null})
+            }
+
+            for (let proced of listaProcedimentos) {
+                await db('pmp_pactuados').insert({'MES': mes, 'ANO': ano, 'CNES': prof.CNES, 'INE': prof.INE, 'CNS': prof.CNS, 'VINC_ID': prof.VINC_ID, 'mat': 0, 'PROCEDIMENTO': proced.COD_PROCED, 'QUANTIDADE': Math.round(proced.QUANTIDADE * coefPact)})
             }
         }
-        console.log('> Finalizou...')
-        res.status(200).json({message: 'Finalizou', ano: ano, mes: mes})
+        console.log('> Finalizado')
+        res.status(200)
     }
 }
 
