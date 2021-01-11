@@ -118,14 +118,10 @@ class profController {
             listaCbos.push(cbo.CBO)
         }
 
-        console.log(listaProfissionais)
-
         listaProfissionais = listaProfissionais.filter((prof) => {
-            console.log(prof)
             return listaCbos.includes(prof.CBO)
         })
-        console.log(listaCbos)
-
+        
         res.status(200).json(listaProfissionais)
     }
 }

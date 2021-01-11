@@ -196,7 +196,6 @@ class pactController {
         const coeficiente = dias_pactuados/20
 
         console.log(user)
-        console.log(vinc_id, ano, mes)
         const pactuado = await db('pmp_hist').select().where({'VINC_ID': vinc_id, 'ANO': ano, 'MES': mes})
         .catch(e => console.log(e))
         if (!pactuado) {
@@ -321,34 +320,20 @@ class pactController {
         .catch(e => res.status(500).json(e))
     }
 
-    async renovarMetasDefault(req, res) {
-        console.log('> Preenchendo as metas padrão do mês...')
-        const { ano, mes } = req.body
-        let diasUteis = await db('dias_uteis').select('DIAS_UTEIS').where({'ANO': ano, 'MES': mes}).first()
-        diasUteis = diasUteis.DIAS_UTEIS
-        
-        await db('pmp_pactuados').delete().where({'ANO': ano, 'MES': mes})
-
-        const listaProfissionais = await db('profissionais').select()
-
-        for (let prof of listaProfissionais) {
-            console.log('>>>', listaProfissionais.indexOf(prof), 'de', listaProfissionais.length)
-            const listaProcedimentos = await db('pmp_padrao').select('COD_PROCED', 'QUANTIDADE').where({'CNES': prof.CNES, 'CBO': prof.CBO})
-            let coefPact = diasUteis/20
-            const jaPactuado = await db('pmp_hist').select('COEFICIENTE').where({'ANO': ano, 'MES': mes, 'VINC_ID': prof.VINC_ID}).first()
-            if (jaPactuado) {   
-                coefPact = jaPactuado.COEFICIENTE
-            }
-            else {
-                await db('pmp_hist').insert({'MES': mes, 'ANO': ano, 'CNES': prof.CNES, 'CNS': prof.CNS, 'VINC_ID': prof.VINC_ID, 'mat': 0, 'COEFICIENTE': coefPact, 'DIAS_PACTUADOS': diasUteis, 'FECHADO': 0, 'JUSTIFICATIVA': null})
-            }
-
-            for (let proced of listaProcedimentos) {
-                await db('pmp_pactuados').insert({'MES': mes, 'ANO': ano, 'CNES': prof.CNES, 'INE': prof.INE, 'CNS': prof.CNS, 'VINC_ID': prof.VINC_ID, 'mat': 0, 'PROCEDIMENTO': proced.COD_PROCED, 'QUANTIDADE': Math.round(proced.QUANTIDADE * coefPact)})
-            }
+    async getUnidadesSobResp(req, res) {
+        const vincId = req.params.vinc_id
+        const fetchCpf = await db('profissionais').select().where('VINC_ID', 'like', `%${vincId}%`).first()
+        if (!fetchCpf) {
+            res.status(500).send('Usuário não encontrado')
         }
-        console.log('> Finalizado')
-        res.status(200)
+        else {
+            const cpf = fetchCpf.CPF
+            await db('cnes').select('CNES', 'NOME_UNIDADE').where({'CPF_RESP': cpf})
+            .then(resultado => {
+                res.status(200).json(resultado)
+            })
+            .catch(e => res.status(500).json(e))
+        }        
     }
 }
 

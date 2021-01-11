@@ -68,25 +68,27 @@ class userController {
     async login(req, res) {        
         const email = req.body.email
         const password = req.body.password
-        await db('users').select('ID', 'NOME', 'EMAIL', 'PASSWORD', 'ADMIN', 'NIVEL', 'ATIVO', 'CNES', 'CPF')
+        await db('users').select()
         .where({'EMAIL': email}).first()
         .then(async resultado => {
             if (resultado) {
                 if (bcrypt.compareSync(password, resultado.PASSWORD)) {
-                    await db('profissionais').select('CNS', 'VINC_ID')
+                    await db('profissionais').select()
                     .where({'CPF': resultado.CPF}).first()
                     .then(cns => {
-                        const payload = {
-                            id: resultado.VINC_ID,
-                            nome: resultado.NOME,
-                            nivel: resultado.NIVEL,
-                            admin: resultado.ADMIN,
-                            cnes: resultado.CNES,
-                            cns: cns.CNS
-                        }                    
-                        jwt.sign(payload, authSecret, { expiresIn: '1h' }, (err, token) => {
-                            res.json({token: token})                  
-                        })                    
+                        if (cns) {
+                            const payload = {
+                                id: cns.VINC_ID,
+                                nome: resultado.NOME,
+                                nivel: resultado.NIVEL,
+                                admin: resultado.ADMIN,
+                                cnes: resultado.CNES,
+                                cns: cns.CNS
+                            }          
+                            jwt.sign(payload, authSecret, { expiresIn: '1h' }, (err, token) => {
+                                res.json({token: token})                  
+                            })                    
+                        }                        
                     })
                     .catch(err => res.status(500).send({message: err.message}))                    
                 }
