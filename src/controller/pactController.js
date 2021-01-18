@@ -335,7 +335,8 @@ class pactController {
             .catch(e => res.status(500).json(e))
         }        
     }
-    async renovarMetasDefault = (req, res) => {  
+    
+    async renovarMetasDefault(req, res) {  
         const {ano, mes} = req.body
         
         console.log('> Preenchendo as metas padrão do mês...')       
