@@ -20,8 +20,12 @@ class userController {
         const hashedPassword = await bcrypt.hash(user.password, 10)
         user.password = hashedPassword
 
-        const user_cbo = await db('profissionais').select('CBO').where({'CPF': user.cpf}).first()
-        if (user_cbo.CBO == 131210) user.nivel = 1
+        const ehResponsavel = await db('cnes').select('CNES', 'CPF_RESP').where({'CPF_RESP': user.cpf})
+        
+        if (ehResponsavel) {
+            user.nivel = 1
+            user.cnes = ehResponsavel.CNES
+        }
         
         await db('users').insert(user)
         .then(userId => { 
