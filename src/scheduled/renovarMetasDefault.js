@@ -5,7 +5,8 @@ const renovarMetasDefault = () => {
     scheduler.scheduleJob({hour: 1, minute: 30}, async () => {
         const tempoComeco = new Date()
         console.log('> Preenchendo as metas padrão do mês...')
-        const { ano, mes } = req.body
+        const ano = tempoComeco.getFullYear()
+        const mes = tempoComeco.getMonth + 1
         let diasUteis = await db('dias_uteis').select('DIAS_UTEIS').where({'ANO': ano, 'MES': mes}).first()
         diasUteis = diasUteis.DIAS_UTEIS
         
