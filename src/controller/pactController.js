@@ -161,7 +161,7 @@ class pactController {
             //ano: new Date().getFullYear(),
             //mes: new Date().getMonth() + 1,
             ano: 2021,
-            mes: 1,
+            mes: 2,
             dia: new Date().getDate()
         }
         res.status(200).json(data)
@@ -328,16 +328,17 @@ class pactController {
         }
         else {
             const cpf = fetchCpf.CPF
-            await db('cnes').select('CNES', 'NOME_UNIDADE').where({'CPF_RESP': cpf})
+            await db('cnes').select('CNES', 'NOME_UNIDADE').where({'CPF_RESP': cpf}).orderBy('NOME_UNIDADE')
             .then(resultado => {
                 res.status(200).json(resultado)
             })
             .catch(e => res.status(500).json(e))
         }        
     }
-    
+
     async renovarMetasDefault(req, res) {  
         const {ano, mes} = req.body
+        const tempoComeco = new Date()
         
         console.log('> Preenchendo as metas padrão do mês...')       
 
