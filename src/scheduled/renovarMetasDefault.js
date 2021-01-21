@@ -2,7 +2,7 @@ const scheduler = require('node-schedule')
 const db = require('../config/database')
 
 const renovarMetasDefault = () => {
-    scheduler.scheduleJob({hour: 14, minute: 57}, async () => {
+    scheduler.scheduleJob({hour: 1, minute: 30}, async () => {
         let tempoComeco = new Date()        
         console.log('> Preenchendo as metas padrão do mês...')
         const ano = tempoComeco.getFullYear()
