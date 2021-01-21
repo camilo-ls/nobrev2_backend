@@ -336,7 +336,7 @@ class pactController {
         }        
     }
 
-    /* async renovarMetasDefault(req, res) {  
+    async renovarMetasDefault(req, res) {  
         const {ano, mes} = req.body
         
         console.log('> Preenchendo as metas padrão do mês...')       
@@ -368,7 +368,7 @@ class pactController {
         const tempoPassado = (tempoFinal - tempoComeco)/1000
         const tempoMinutos = tempoPassado/60
         console.log('> Finalizado em', tempoMinutos, 'minutos')       
-    } */
+    }
 }
 
 module.exports = new pactController()
