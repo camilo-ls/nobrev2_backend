@@ -349,22 +349,28 @@ class pactController {
 
         const listaProfissionais = await db('profissionais').select()
 
-        for (let prof of listaProfissionais) {
-            console.log('>>>', listaProfissionais.indexOf(prof), 'de', listaProfissionais.length)
-            const listaProcedimentos = await db('pmp_padrao').select('COD_PROCED', 'QUANTIDADE').where({'CNES': prof.CNES, 'CBO': prof.CBO})
-            let coefPact = diasUteis/20
-            const jaPactuado = await db('pmp_hist').select('COEFICIENTE').where({'ANO': ano, 'MES': mes, 'VINC_ID': prof.VINC_ID}).first()
-            if (jaPactuado) {   
-                coefPact = jaPactuado.COEFICIENTE
-            }
-            else {
-                await db('pmp_hist').insert({'MES': mes, 'ANO': ano, 'CNES': prof.CNES, 'CNS': prof.CNS, 'VINC_ID': prof.VINC_ID, 'mat': 0, 'COEFICIENTE': coefPact, 'DIAS_PACTUADOS': diasUteis, 'FECHADO': 0, 'JUSTIFICATIVA': null})
-            }
+        // for (let prof of listaProfissionais) {
+        //     console.log('>>>', listaProfissionais.indexOf(prof), 'de', listaProfissionais.length)
+        //     const listaProcedimentos = await db('pmp_padrao').select('COD_PROCED', 'QUANTIDADE').where({'CNES': prof.CNES, 'CBO': prof.CBO})
+        //     let coefPact = diasUteis/20
+        //     const jaPactuado = await db('pmp_hist').select('COEFICIENTE').where({'ANO': ano, 'MES': mes, 'VINC_ID': prof.VINC_ID}).first()
+        //     if (jaPactuado) {   
+        //         coefPact = jaPactuado.COEFICIENTE
+        //     }
+        //     else {
+        //         await db('pmp_hist').insert({'MES': mes, 'ANO': ano, 'CNES': prof.CNES, 'CNS': prof.CNS, 'VINC_ID': prof.VINC_ID, 'mat': 0, 'COEFICIENTE': coefPact, 'DIAS_PACTUADOS': diasUteis, 'FECHADO': 0, 'JUSTIFICATIVA': null})
+        //     }
 
-            for (let proced of listaProcedimentos) {
-                await db('pmp_pactuados').insert({'MES': mes, 'ANO': ano, 'CNES': prof.CNES, 'INE': prof.INE, 'CNS': prof.CNS, 'VINC_ID': prof.VINC_ID, 'mat': 0, 'PROCEDIMENTO': proced.COD_PROCED, 'QUANTIDADE': Math.round(proced.QUANTIDADE * coefPact)})
-            }
-        }
+        //     for (let proced of listaProcedimentos) {
+        //         await db('pmp_pactuados').insert({'MES': mes, 'ANO': ano, 'CNES': prof.CNES, 'INE': prof.INE, 'CNS': prof.CNS, 'VINC_ID': prof.VINC_ID, 'mat': 0, 'PROCEDIMENTO': proced.COD_PROCED, 'QUANTIDADE': Math.round(proced.QUANTIDADE * coefPact)})
+        //     }
+        // }
+
+        console.log('> Deletando da pmp_hist os profissionais que saíram da base...')
+        const listaVinculos = await db('profissionais').select('VINC_ID')
+        console.log(listaVinculos)
+        //await db('pmp_hist').delete().whereNotIn(listaVinculos).andWhere({'ANO': ano, 'MES': mes})
+
         const tempoFinal = new Date()
         const tempoPassado = (tempoFinal - tempoComeco)/1000
         const tempoMinutos = tempoPassado/60
