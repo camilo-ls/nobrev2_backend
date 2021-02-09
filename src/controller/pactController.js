@@ -373,7 +373,7 @@ class pactController {
             listaVinculos.push(vinculo.VINC_ID)
         }
         
-        await db('pmp_hist').delete().whereNotIn(listaVinculos).andWhere({'ANO': ano, 'MES': mes})
+        await db('pmp_hist').delete().whereNotIn('VINC_ID', listaVinculos).andWhere({'ANO': ano, 'MES': mes})
 
         console.log('> Deletando os da pmp_hist of CBOs que não fazem pactuação...')
         const relUnidades = await db('cnes').distinct('CNES')
@@ -385,7 +385,7 @@ class pactController {
             for (let cbo of relCbos) {
                 listaCbos.push(cbo.CBO)
             }
-            let relVinculos = await db('profissionais').select('VINC_ID').whereNotIn(listaCbos)
+            let relVinculos = await db('profissionais').select('VINC_ID').whereNotIn('CBO', listaCbos)
             for (let prof of relVinculos) {
                 await db('pmp_hist').delete().where({'VINC_ID': prof.VINC_ID})
             }
