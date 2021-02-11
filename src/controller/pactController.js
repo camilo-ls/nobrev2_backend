@@ -373,24 +373,6 @@ class pactController {
             listaVinculos.push(vinculo.VINC_ID)
         }
         
-        await db('pmp_hist').delete().whereNotIn('VINC_ID', listaVinculos).andWhere({'ANO': ano, 'MES': mes})
-
-        console.log('> Deletando os da pmp_hist of CBOs que não fazem pactuação...')
-        const relUnidades = await db('cnes').distinct('CNES')
-            
-        for (let cnes of relUnidades) {
-            console.log('>>>', relUnidades.indexOf(cnes), 'de', relUnidades.length)
-            const relCbos = await db('pmp_padrao').distinct('CBO').where({'CNES': cnes.CNES})
-            let listaCbos = []
-            for (let cbo of relCbos) {
-                listaCbos.push(cbo.CBO)
-            }
-            let relVinculos = await db('profissionais').select('VINC_ID').whereNotIn('CBO', listaCbos)
-            for (let prof of relVinculos) {
-                await db('pmp_hist').delete().where({'VINC_ID': prof.VINC_ID})
-            }
-        }
-
         const tempoFinal = new Date()
         const tempoPassado = (tempoFinal - tempoComeco)/1000
         const tempoMinutos = tempoPassado/60
