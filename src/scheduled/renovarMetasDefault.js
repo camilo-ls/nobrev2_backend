@@ -35,6 +35,34 @@ const renovarMetasDefault = () => {
                 await db('pmp_pactuados').insert({'MES': mes, 'ANO': ano, 'CNES': prof.CNES, 'INE': prof.INE, 'CNS': prof.CNS, 'VINC_ID': prof.VINC_ID, 'mat': 0, 'PROCEDIMENTO': proced.COD_PROCED, 'QUANTIDADE': Math.round(proced.QUANTIDADE * coefPact)})
             }
         }
+
+        console.log('> Deletando da pmp_hist os profissionais que saíram da base...')
+        const relVinculos = await db('profissionais').select('VINC_ID')
+        let listaVinculos = []
+        for (let vinculo of relVinculos) {
+            listaVinculos.push(vinculo.VINC_ID)
+        }
+        await db('pmp_hist').delete().whereNotIn('VINC_ID', listaVinculos).andWhere({'ANO': ano, 'MES': mes})
+
+        console.log('> Deletando da pmp_hist os profissionais com CBOs que não produzem meta...')
+        const relCnes = await db('cnes').distinct('CNES')
+        let listaCNES = []
+        for (let nCnes of relCnes) {
+            console.log('>>>', relCnes.indexOf(nCnes), 'de', relCnes.length)
+            const cnes = nCnes.CNES
+            const relCBOs = await db.distinct('CBO').from('pmp_padrao').where({'CNES': cnes})
+            let listaCBOs = []
+            for (let cbo of relCBOs) {
+                listaCBOs.push(cbo.CBO)
+            }
+            const relVinculos = await db.distinct('VINC_ID').from('profissionais').whereNotIn('CBO', listaCBOs).andWhere({'CNES': cnes})
+            let listaVinculos = []
+            for (let vinc of relVinculos) {
+                listaVinculos.push(vinc.VINC_ID)
+            }
+            await db.delete().from('pmp_hist').whereIn('VINC_ID', listaVinculos).andWhere({'CNES': cnes})
+        }
+        
         const tempoFinal = new Date()
         const tempoPassado = (tempoFinal - tempoComeco)/1000
         const tempoMinutos = tempoPassado/60
