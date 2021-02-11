@@ -376,7 +376,7 @@ class pactController {
 
         console.log('> Deletando da pmp_hist os profissionais com CBOs que não produzem meta...')
         const relCnes = await db('cnes').distinct('CNES')
-        listaCNES = []
+        let listaCNES = []
         for (let nCnes of relCnes) {
             console.log('>>>', relCnes.indexOf(nCnes), 'de', relCnes.length)
             const cnes = nCnes.CNES
