@@ -372,7 +372,22 @@ class pactController {
         for (let vinculo of relVinculos) {
             listaVinculos.push(vinculo.VINC_ID)
         }
-        
+        await db('pmp_hist').delete().whereNotIn('VINC_ID', listaVinculos).andWhere({'ANO': ano, 'MES': mes})
+
+        console.log('> Deletando da pmp_hist os profissionais com CBOs que não produzem meta...')
+        const relCnes = await db('cnes').distinct('CNES')
+        listaCNES = []
+        for (let nCnes of relCnes) {
+            console.log('>>>', relCnes.indexOf(nCnes), 'de', relCnes.length)
+            cnes = nCnes.CNES
+            relCBOs = await db.distinct('CBO').from('pmp_padrao').where('CNES': cnes)
+            listaCBOs = []
+            for (let cbo of relCBOs) {
+                listaCBOs.push(cbo.CBO)
+            }
+            await db.delete().from('pmp_hist').leftJoin('profissionais', 'pmp_hist.VINC_ID', 'profissionais.VINC_ID').whereNotIn('profissionais.CBO', listaCBOs).andWhere('CNES': cnes)
+        }
+        // select * from pmp_hist left join profissionais on pmp_hist.VINC_ID = profissionais.VINC_ID where profissionais.CBO not in (select DISTINCT CBO from pmp_padrao where CNES = 3027163) and pmp_hist.CNES = 3027163 
         const tempoFinal = new Date()
         const tempoPassado = (tempoFinal - tempoComeco)/1000
         const tempoMinutos = tempoPassado/60
