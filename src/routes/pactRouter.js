@@ -26,6 +26,8 @@ router.get('/semsa/anos', pactController.getAnosSemsa)
 router.get('/semsa/meses/:ano', pactController.getMesesSemsa)
 router.get('/resp/:vinc_id', pactController.getUnidadesSobResp)
 
+router.get('/comp/disa/:ano/:mes/:disa', pactController.getCompetenciaDisa)
+
 router.post('/renovar_metas_default', pactController.renovarMetasDefault)
 router.post('/pactuar', pactValidator, pactController.setPactFuncionario)
 
