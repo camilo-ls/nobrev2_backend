@@ -379,9 +379,9 @@ class pactController {
         listaCNES = []
         for (let nCnes of relCnes) {
             console.log('>>>', relCnes.indexOf(nCnes), 'de', relCnes.length)
-            cnes = nCnes.CNES
-            relCBOs = await db.distinct('CBO').from('pmp_padrao').where({'CNES': cnes})
-            listaCBOs = []
+            const cnes = nCnes.CNES
+            const relCBOs = await db.distinct('CBO').from('pmp_padrao').where({'CNES': cnes})
+            let listaCBOs = []
             for (let cbo of relCBOs) {
                 listaCBOs.push(cbo.CBO)
             }
