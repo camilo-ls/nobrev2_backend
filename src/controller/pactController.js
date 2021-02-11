@@ -385,12 +385,12 @@ class pactController {
             for (let cbo of relCBOs) {
                 listaCBOs.push(cbo.CBO)
             }
-            const relVinculos = await db.distinct('VINC_ID').from('profissionais').whereNotIn('CBO', listaCBOs)
+            const relVinculos = await db.distinct('VINC_ID').from('profissionais').whereNotIn('CBO', listaCBOs).andWhere({'CNES': cnes})
             let listaVinculos = []
             for (let vinc of relVinculos) {
                 listaVinculos.push(vinc.VINC_ID)
             }
-            await db.delete().from('pmp_hist').whereNotIn('VINC_ID', listaVinculos).andWhere({'CNES': cnes})
+            await db.delete().from('pmp_hist').whereIn('VINC_ID', listaVinculos).andWhere({'CNES': cnes})
         }
         const tempoFinal = new Date()
         const tempoPassado = (tempoFinal - tempoComeco)/1000
