@@ -93,6 +93,8 @@ class pactController {
         const mes = req.params.mes
 
         let listaUnidades = []
+        let listaUnidadesPactSim = []
+        let listaUnidadesPactNao = []
         const fetchUnidades = await db('cnes').select('CNES', 'NOME_UNIDADE').where({'DISA': disa})
         for (let unidade of fetchUnidades) {
             const pactuouCont = await db('pmp_hist').count('* as count').where({'CNES': unidade.CNES, 'ANO': ano, 'MES': mes, 'FECHADO': true}).first()
@@ -107,8 +109,15 @@ class pactController {
             if (nPactuouCont.count == 0 && pactuouCont.count != 0) novaUnidade.fechou = true
             novaUnidade.faltam = nPactuouCont.count
             novaUnidade.pactuaram = pactuouCont.count            
-            listaUnidades.push(novaUnidade)
+            if (novaUnidade.fechou === true) {
+                listaUnidadesPactSim.push(novaUnidade)
+            }
+            else {
+                listaUnidadesPactNao.push(novaUnidade)
+            }
         }
+        listaUnidades.push(listaUnidadesPactSim)
+        listaUnidades.push(listaUnidadesPactNao)
         res.status(200).json(listaUnidades)
     }
 
