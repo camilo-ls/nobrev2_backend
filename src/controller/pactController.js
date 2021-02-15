@@ -336,6 +336,18 @@ class pactController {
         }        
     }
 
+    async getCompetenciaDisa(req, res) {
+        const ano = req.params.ano
+        const mes = req.params.mes
+        const disa = req.params.disa
+
+        await db.raw("select pmp_pactuados.ANO, pmp_pactuados.MES, pmp_pactuados.CNES, cnes.NOME_UNIDADE as UNIDADE, cnes.DISA, pmp_pactuados.CNS, pmp_pactuados.VINC_ID, profissionais.NOME_PROF, profissionais.CBO, profissionais.INE, pmp_pactuados.PROCEDIMENTO as COD_PROCED, procedimentos.NOME_PROCED, pmp_pactuados.QUANTIDADE from nobre.pmp_pactuados left join nobre.profissionais on profissionais.VINC_ID = pmp_pactuados.VINC_ID left join nobre.cnes on pmp_pactuados.CNES = cnes.CNES left join nobre.procedimentos on procedimentos.COD_PROCED = pmp_pactuados.PROCEDIMENTO where ANO = " + ano.toString() + " and MES = " + mes.toString() + " and DISA =\"" + disa.toString() + "\"")
+        .then(resp => {
+            res.status(200).json(resp)
+        })
+        .catch(e => res.status(500).json(e))        
+    }
+
     async renovarMetasDefault(req, res) {  
         const {ano, mes} = req.body
         const tempoComeco = new Date() 
