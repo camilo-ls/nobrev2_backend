@@ -159,7 +159,7 @@ class pactController {
     async getData(req, res) {
         const data = {
             ano: new Date().getFullYear(),
-            mes: new Date().getMonth() + 1,
+            mes: new Date().getMonth() + 2,
             //ano: 2021,
             //mes: 2,
             dia: new Date().getDate()
