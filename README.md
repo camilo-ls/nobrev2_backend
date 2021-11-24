@@ -13,7 +13,7 @@ Em 2020 fui trabalhar no DICAR e, por iniciativa do meu superior à época, come
 
 ## Comentários
 
-Foi o primeiro sistema web que implementei na vida e isso fica evidente pelo código, porém é um sistema que se provou muito eficaz em sua proposta e que gerou um legado importante dentro do DICAR. Aqui, disponibilizo até onde atuei, pois deixei a SEMSA e o projeto seguiu sendo implementado por outras pessoas.
+Foi o primeiro sistema web que implementei na vida e isso fica evidente pela qualidade do código, porém é um sistema que se provou muito eficaz em sua proposta e que gerou um legado importante dentro do DICAR. Aqui, disponibilizo até onde atuei, pois deixei a SEMSA e o projeto seguiu sendo implementado por outras pessoas.
 
 A ideia de disponibilizar o código-fonte do NOBRE se fundamenta no Princípio da Publicidade e no Direito de Acesso à Informação, além de servir como base para que outras Secretarias, caso encontrem utilidade, também o utilizem, como ponto de partida ou como quiserem.
 
