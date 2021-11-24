@@ -2,7 +2,7 @@
 
 ## Stack utilizada
 - React
-- Node
+- Express
 - MySQL
 
 ## História
